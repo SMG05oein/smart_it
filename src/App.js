@@ -1,15 +1,12 @@
+import logo from './logo.svg';
 import './App.css';
-import {Route, Routes} from "react-router-dom";
-import {Col, Container, Row} from "react-bootstrap";
-import {useState} from "react";
 
 function App() {
+  return (
+    <div className="App">
 
-    return (
-        <div>
-
-        </div>
-    );
+    </div>
+  );
 }
 
 export default App;
