@@ -49,12 +49,11 @@ app.post(`/api/Login`, async (req, res) => {
     const req2 = req.body;
     let result = await login(req2);
     let status = result === true ? 401 : 200;
-    // res.cookie('cookieName', 'cookieValue'); // 기본 쿠키 생성
 
     res.cookie('auth', req2.userId, {
         httpOnly: true,
         secure: false,
-        sameSite: 'Lax',
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24,
     });
 
@@ -64,7 +63,18 @@ app.post(`/api/Login`, async (req, res) => {
 app.get('/Test', async (req, res) => {
     res.cookie('testCookie', 'Temp'); // 기본 쿠키 생성
     res.send({status: 'Sss'});
+})
 
+app.get('/api/isLogin', (req, res) => {
+    const userId = req.cookies.auth; // ⭐ 서버는 httpOnly 쿠키에 접근 가능
+    if (userId) {
+        res.status(200).json({ isLoggedIn: true, userId: userId, name: '사용자 이름' });
+    } else {
+        res.status(401).json({ isLoggedIn: false, message: '로그인 필요' });
+    }
+})
+
+app.get('/logout', (req, res) => {
 
 })
 /** 로그인, 회원가입 API 끝 */

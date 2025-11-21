@@ -15,7 +15,8 @@ const Login = () => {
         axios.post(`${process.env.REACT_APP_API_URL}/api/Login`, {
             userId: id,
             pass: pass,
-        }).then(r => {
+        },{withCredentials: true})
+            .then(r => {
             console.log(r.data);
             if(r.data.status === 200){
                 // navigate("/");
