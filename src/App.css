@@ -1,3 +1,10 @@
 body{
     margin:0;
 }
+
+.Section{
+    height: calc(100vh - 130px);
+    padding: 20px 8px 20px 8px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}

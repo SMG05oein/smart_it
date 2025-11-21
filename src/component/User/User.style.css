@@ -1,0 +1,100 @@
+
+.Section.container-fluid.h-100 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ------------------ 제목 스타일 ------------------ */
+
+.LoginTitle {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #1a1a1a;
+    width: 100%;
+    text-align: center;
+}
+
+/* ------------------ 입력 필드 스타일 ------------------ */
+
+.LoginId, .LoginPw {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.LoginId span, .LoginPw span {
+    min-width: 70px;
+    font-weight: 500;
+    color: #555;
+    margin-right: 15px;
+    text-align: right;
+}
+
+.LoginId input, .LoginPw input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.LoginId input:focus, .LoginPw input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+/* ------------------ 찾기 링크 스타일 ------------------ */
+
+.idSearch, .pwSearch {
+    padding: 10px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.idSearch:hover, .pwSearch:hover {
+    color: #007bff;
+}
+
+.idSearch, .pwSearch {
+    padding: 10px 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s;
+    text-decoration: none;
+    /* [FIX] 텍스트가 줄 바꿈되지 않도록 설정 */
+    white-space: nowrap;
+}
+
+.idSearch::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background-color: #ccc;
+}
+
+/* 기타 */
+.btn-sm{
+    font-size: .7rem;
+    border-radius: 7px;
+}
