@@ -26,7 +26,7 @@ const HospitalSearch = () => {
                         style={{
                             border: "1px solid #ddd",
                             borderRadius: "8px",
-                            height: "350px",
+                            height: "600px",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

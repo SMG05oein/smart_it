@@ -9,6 +9,7 @@ import HospitalSearch from "./component/Hospital/HospitalSearch"; // 동물병�
 import ChatBot from "./component/chat/ChatBot";                    // ✅ 챗봇 화면 추가
 import BoardList from "./component/Board/BoardList";
 import BoardDetail from "./component/Board/BoardDetail";
+import MyPage from "./component/User/MyPage";
 
 function App() {
     return (
@@ -22,6 +23,10 @@ function App() {
 
                 {/* 챗봇 화면 */}
                 <Route path={"/chat"} element={<ChatBot />} />
+
+                {/* 마이페이지 */}
+                <Route path={"/mypage"} element={<div className={'Section scroll-hidden'}><MyPage/></div>} />
+
 
                 {/* 게시판 */}
                 <Route path={"/board"} element={<BoardList />} />

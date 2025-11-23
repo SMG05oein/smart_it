@@ -47,8 +47,8 @@ const SignUp = () => {
             isAdmin: 0
         })
             .then(r => {
-                const rr = r.data[0];
-                console.log(r.data.status[0]);
+                const rr = r.data.status[0];
+                console.log(r.data.status[0].serverStatus);
                 if (rr.serverStatus === 2) {
                     navigate('/Login')
                 }else{

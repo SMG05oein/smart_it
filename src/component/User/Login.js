@@ -19,7 +19,9 @@ const Login = () => {
             .then(r => {
             console.log(r.data);
             if(r.data.status === 200){
-                // navigate("/");
+                localStorage.setItem("isLogin","true");
+                localStorage.setItem("userId",id);
+                navigate("/");
             }else{
                 alert("아이디 또는 비밀번호가 맞지 않습니다.");
             }

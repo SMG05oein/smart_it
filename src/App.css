@@ -8,3 +8,69 @@ body{
     overflow-y: auto;
     box-sizing: border-box;
 }
+
+/* === 캘린더 색상용 CSS === */
+
+/* 일요일 세로줄 빨간 느낌 */
+.cal-sunday {
+    background-color: #ffe5e5;
+}
+
+/* 토요일 세로줄 파란 느낌 */
+.cal-saturday {
+    background-color: #e5ecff;
+}
+
+/* 일정이 있는 날 → 초록색 */
+.cal-has-todo {
+    background-color: #4caf50 !important;
+    color: #fff !important;
+}
+
+.cal-has-todo:hover {
+    filter: brightness(0.9);
+}
+body{
+    margin:0;
+}
+
+.Section{
+    height: calc(100vh - 130px);
+    padding: 20px 8px 20px 8px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* === 캘린더 색상 === */
+.cal-sunday {
+    background-color: #ffe5e5;
+}
+
+.cal-saturday {
+    background-color: #e5ecff;
+}
+
+.cal-has-todo {
+    background-color: #4caf50 !important;
+    color: #fff !important;
+}
+
+.cal-has-todo:hover {
+    filter: brightness(0.9);
+}
+
+/* === 캘린더 전체 크기 조절 === */
+
+/* 가로: 섹션 안에서 가운데 정렬 + 최대 너비 지정 */
+.my-calendar {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 세로: 날짜 칸 높이를 키워서 전체 높이 늘리기 */
+.my-calendar .react-calendar__tile {
+    height: 3.5rem;
+    padding: 0.5rem 0;
+}
+

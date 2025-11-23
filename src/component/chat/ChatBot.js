@@ -13,11 +13,11 @@ const ChatBot = () => {
                 style={{
                     border: "1px solid #888",
                     borderRadius: "4px",
-                    height: "420px",
+                    height: "750px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    paddingTop: "120px", // 위쪽 여백 (입력창 내려오게)
+                    paddingTop: "300px"
                 }}
             >
                 {/* 검색 입력칸 (나중에 GPT 연동할 부분) */}
