@@ -11,7 +11,7 @@ const { insertBoard } = require("../sql/board/sql");
 
 /**
  * @swagger
- * /create:
+ * /createBoard:
  *   post:
  *     summary: 게시글 등록
  *     tags: [게시글]
@@ -67,7 +67,7 @@ const { insertBoard } = require("../sql/board/sql");
  *                   type: string
  */
 
-router.post('/create', async (req, res) => {
+router.post('/createBoard', async (req, res) => {
     const req2 = req.body;
 
     // 필수 값 체크
