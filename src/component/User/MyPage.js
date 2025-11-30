@@ -13,7 +13,7 @@ const MyPage = () => {
         <div className="h-100">
             <Container
                 fluid
-                className="h-100 justify-content-center align-content-start"
+                className="h-100 d-flex flex-column justify-content-center align-content-start"
                 style={{ paddingTop: "20px" }}
             >
                 {/* 제목 */}

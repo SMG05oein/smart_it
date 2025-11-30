@@ -87,7 +87,7 @@ const BoardList = () => {
                         </Button>
                     </Col>
                     <Col xs="auto" className="text-end">
-                        <Button variant="primary" size="sm">
+                        <Button onClick={()=>navigate("/board/0")} variant="primary" size="sm">
                             등록
                         </Button>
                     </Col>

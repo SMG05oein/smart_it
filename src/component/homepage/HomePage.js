@@ -1,9 +1,10 @@
-// src/Test.js
-import React, { useState, useMemo } from "react";
+// src/HomePage.js
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import {useMemo, useState} from "react";
+import DailyList from "./DailyList";
 
-function Test() {
+function Homepage() {
     // 캘린더에 선택된 날짜
     const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -116,7 +117,7 @@ function Test() {
                 {/* 🔹 가운데 정렬 + my-calendar 클래스로 크기 조절 */}
                 <Calendar
                     className="my-calendar"
-                    onChange={setSelectedDate}
+                    onChange={()=>setSelectedDate}
                     value={selectedDate}
                     onClickDay={setSelectedDate}
                     onActiveStartDateChange={({ activeStartDate }) =>
@@ -164,7 +165,7 @@ function Test() {
                         onChange={(e) => setInputText(e.target.value)}
                         style={{ flex: 1, padding: "6px 8px" }}
                     />
-                    <button onClick={handleAddTodo} style={{ padding: "6px 12px" }}>
+                    <button className={"btn btn-primary"} onClick={handleAddTodo} style={{ padding: "6px 12px" }}>
                         추가
                     </button>
                 </div>
@@ -178,63 +179,9 @@ function Test() {
             </div>
 
             {/* 아래 나의 일지 리스트 */}
-            <div
-                style={{
-                    border: "1px solid #777",
-                    borderRadius: "4px",
-                    padding: "12px",
-                    marginTop: "16px",
-                }}
-            >
-                <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
-                    나의 일지 {currentMonth + 1}월
-                </div>
-                {monthTodos.length === 0 ? (
-                    <div style={{ color: "#777", fontSize: "0.9rem" }}>
-                        아직 등록된 일정이 없습니다.
-                    </div>
-                ) : (
-                    <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                        {monthTodos.map((item, idx) => (
-                            <li
-                                key={`${item.key}-${idx}`}
-                                style={{
-                                    marginBottom: "6px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "6px",
-                                    fontSize: "0.9rem",
-                                }}
-                            >
-                                <input type="checkbox" />
-                                <span style={{ flex: 1 }}>
-                                    {`${item.date.getMonth() + 1}월 ${item.date.getDate()}일 - ${
-                                        item.text
-                                    }`}
-                                </span>
-                                <button
-                                    style={{ fontSize: "0.75rem", padding: "2px 6px" }}
-                                    onClick={() => handleEditTodo(item)}
-                                >
-                                    수정
-                                </button>
-                                <button
-                                    style={{
-                                        fontSize: "0.75rem",
-                                        padding: "2px 6px",
-                                        marginLeft: "2px",
-                                    }}
-                                    onClick={() => handleDeleteTodo(item)}
-                                >
-                                    삭제
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
+            <DailyList currentMonth={currentMonth} monthTodos={monthTodos} handleEditTodo={handleEditTodo} handleDeleteTodo={handleDeleteTodo}/>
         </div>
     );
 }
 
-export default Test;
+export default Homepage;

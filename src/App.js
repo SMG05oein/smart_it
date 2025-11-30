@@ -2,7 +2,7 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import GNB from "./component/NB/GNB";
 import FNB from "./component/NB/FNB";
-import Test from "./Test";
+import HomePage from "./component/homepage/HomePage";
 import Login from "./component/User/Login";
 import SignUp from "./component/User/SignUp";
 import HospitalSearch from "./component/Hospital/HospitalSearch"; // 동물병원 조회
@@ -16,21 +16,21 @@ function App() {
         <Routes>
             <Route path={"/"} element={<><GNB/><FNB/></>}>
                 {/* 메인 페이지 */}
-                <Route index element={<Test />} />  {/** 홈페이지 할 때 바꾸십쇼 */}
+                <Route index element={<div className={'Section scroll-hidden'}><HomePage /></div>} />  {/** 홈페이지 할 때 바꾸십쇼 */}
 
                 {/* 동물병원 조회 */}
-                <Route path={"/hospital"} element={<HospitalSearch />} />
+                <Route path={"/hospital"} element={<div className={'Section scroll-hidden'}><HospitalSearch /></div>} />
 
                 {/* 챗봇 화면 */}
-                <Route path={"/chat"} element={<ChatBot />} />
+                <Route path={"/chat"} element={<div className={'Section scroll-hidden'}><ChatBot /></div>} />
 
                 {/* 마이페이지 */}
                 <Route path={"/mypage"} element={<div className={'Section scroll-hidden'}><MyPage/></div>} />
 
 
                 {/* 게시판 */}
-                <Route path={"/board"} element={<BoardList />} />
-                <Route path={"/board/:id"} element={<BoardDetail />} />
+                <Route path={"/board"} element={<div className={'Section scroll-hidden'}><BoardList /></div>} />
+                <Route path={"/board/:id"} element={<div className={'Section scroll-hidden'}><BoardDetail /></div>} />
 
                 {/* 로그인 / 회원가입 */}
                 <Route

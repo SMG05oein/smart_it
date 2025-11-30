@@ -5,9 +5,11 @@ const app = express();
 const { connectDB, getConnection } = require('./src_back/config/config');
 const { testSql, checkId, addMember, login} = require('./src_back/sql/sql');
 const cookieParser = require('cookie-parser');
+const { swaggerUi, specs } = require("./swagger/swagger")
 
 const port = process.env.PORT || 8008; // 포트 설정
 
+app.use("/api/swagger", swaggerUi.serve, swaggerUi.setup(specs))
 
 // connectDB();
 
@@ -30,6 +32,26 @@ app.get('/getcookie', (req, res) => {
 });
 
 /** 로그인, 회원가입 API 시작*/
+
+/**
+ * @swagger
+ * /api/checkId/{id}:
+ *  get:
+ *    summary: 아이디 중복 확인
+ *    tags: [회원인증]
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *    schema:
+ *      type: string
+ *      required: true
+ *      description: 확인할 사용자 ID
+ *    responses:
+ *      "200":
+ *        description: 이미 사용 중인 아이디 (status 401)
+ *      "201":
+ *        description: 사용 가능한 아이디 (status 200)
+ */
 app.get(`/api/checkId/:id`, async (req, res) => {
     const id = req.params.id;
     let cc = await checkId(id);
