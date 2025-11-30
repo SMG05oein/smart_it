@@ -29,6 +29,10 @@ const { insertBoard, deleteBoard, getBoard, updateBoard } = require("../sql/boar
  *     responses:
  *       201:
  *         description: 게시글 등록 성공
+ *       400:
+ *         description: 필수 항목 누락 또는 로그인 안 됨
+ *       500:
+ *         description: 서버 오류
  */
 router.post('/createBoard', async (req, res) => {
     const req2 = req.body;
@@ -65,7 +69,7 @@ router.post('/createBoard', async (req, res) => {
  *       200:
  *         description: 삭제 성공
  *       400:
- *         description: 게시글이 없거나 삭제 실패
+ *         description: 게시글이 없거나 권한 없음
  *       500:
  *         description: 서버 오류
  */
@@ -74,7 +78,7 @@ router.post('/deleteBoard', async (req, res) => {
     if (!boardId) return res.status(400).json({ status: 400, message: 'boardId가 필요합니다.' });
     try {
         const result = await deleteBoard(boardId, req.cookies.auth);
-        if (!result) return res.status(400).json({ status: 400, message: '삭제할 게시글이 없거나 권한이 없습니다.' });
+        if (!result) return res.status(400).json({ status: 400, message: '삭제할 게시글이 없거나 사용자 게시물이 아닙니다.' });
         res.status(200).json({ status: 200, message: '게시글 삭제 성공' });
     } catch (error) {
         console.error(error);
@@ -137,7 +141,7 @@ router.get('/board/:id', async (req, res) => {
  *       200:
  *         description: 게시글 수정 성공
  *       400:
- *         description: 게시글 없음 또는 수정 실패
+ *         description: 게시글 없음 또는 권한 없음
  *       500:
  *         description: 서버 오류
  */
@@ -147,7 +151,7 @@ router.post('/updateBoard', async (req, res) => {
 
     try {
         const result = await updateBoard(boardId, req.cookies.auth, title, content);
-        if (!result) return res.status(400).json({ status: 400, message: '수정할 게시글이 없거나 권한이 없습니다.' });
+        if (!result) return res.status(400).json({ status: 400, message: '수정할 게시글이 없거나 사용자 게시물이 아닙니다.' });
         res.status(200).json({ status: 200, message: '게시글 수정 성공' });
     } catch (error) {
         console.error(error);
