@@ -132,6 +132,7 @@ router.post(`/Login`, async (req, res) => {
         return res.status(400).json({ status: 400, message: 'userId와 pass는 필수입니다.' });
     }
     try {
+        console.log(req2)
         const result = await login(req2);
         const status = result ? 200 : 401; // login 함수 성공 시 true라면 200, 실패면 401
 

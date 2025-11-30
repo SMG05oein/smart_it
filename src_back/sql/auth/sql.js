@@ -35,7 +35,8 @@ async function login(req2) {
     const query  = `SELECT * FROM members WHERE user_id = ? AND pass = ? `;
     let con = await getConnection();
     let result = await con.query(query, [req2.userId, req2.pass] );
-    return result[0].length === 0; // 있다면 false 없으면 true
+    console.log(result[0]);
+    return result[0].length !== 0; // 있다면 false 없으면 true
 }
 
 module.exports = {
