@@ -1,60 +1,59 @@
-// src/component/Board/BoardList.js
-import React, {useState, useEffect} from "react";
+// src/component/Diary/DiaryListPage.js
+import React, {useEffect, useState} from "react";
 import {Container, Row, Col, Table, Button, Form} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 
-// 필요 없으면 []로 두고 써도 됨
-const dummyPosts = [
-    {id: 32, title: "강아지가 아파요", author: "user_id", date: "2025-10-10"},
-    {id: 31, title: "강아지 귀여워ㅠㅠ", author: "user_id", date: "2025-10-10"},
-    {id: 30, title: "배고파", author: "user_id", date: "2025-10-10"},
-    {id: 29, title: "뭐 먹고 싶어?", author: "user_id", date: "2025-10-10"},
-    {id: 28, title: "김치찌개가 먹고 싶어", author: "user_id", date: "2025-10-10"},
-    {id: 27, title: "집사가 돌아왔지", author: "user_id", date: "2025-10-10"},
-    {id: 26, title: "너가 제일 좋아하지 해", author: "user_id", date: "2025-10-10"},
-    {id: 25, title: "또 엄청나 돌아가지롱", author: "user_id", date: "2025-10-10"},
-    {id: 24, title: "마셔", author: "user_id", date: "2025-10-10"},
-];
+const STORAGE_KEY = "diaryPosts";
 
-const BoardList = () => {
+// localStorage 에서 일지 목록 불러오기
+const loadDiaries = () => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+};
+
+const DiaryListPage = () => {
     const navigate = useNavigate();
 
-    // 🔹 입력창에 보이는 값
     const [searchInput, setSearchInput] = useState("");
-    // 🔹 실제 필터에 사용하는 키워드 (검색 버튼 눌렀을 때만 바뀜)
     const [keyword, setKeyword] = useState("");
+    const [diaries, setDiaries] = useState([]);
 
-    // 한 페이지 10개
-    const postsPerPage = 10;
+    // 페이지네이션
+    const [currentPage, setCurrentPage] = useState(1);
+    const diariesPerPage = 10;
 
-    // 최근 글 먼저
-    const sorted = [...dummyPosts].sort((a, b) => b.id - a.id);
+    // 처음 들어왔을 때 localStorage에서 로딩
+    useEffect(() => {
+        setDiaries(loadDiaries());
+    }, []);
 
-    // 🔹 keyword 기준으로만 필터
-    const filtered = sorted.filter((p) =>
-        p.title.toLowerCase().includes(keyword.toLowerCase())
+    // 검색 버튼 눌렀을 때만 실제 검색어 변경
+    const handleSearch = () => {
+        setKeyword(searchInput.trim());
+        setCurrentPage(1);
+    };
+
+    // 최신 순 정렬
+    const sorted = [...diaries].sort((a, b) => b.id - a.id);
+
+    // 제목으로 필터
+    const filtered = sorted.filter((d) =>
+        d.title.toLowerCase().includes(keyword.toLowerCase())
     );
 
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // keyword가 바뀔 때 페이지 1로
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [keyword]);
-
-    const totalPages = Math.ceil(filtered.length / postsPerPage) || 1;
-    const indexOfLast = currentPage * postsPerPage;
-    const indexOfFirst = indexOfLast - postsPerPage;
-    const currentPosts = filtered.slice(indexOfFirst, indexOfLast);
+    const totalPages = Math.ceil(filtered.length / diariesPerPage) || 1;
+    const indexOfLast = currentPage * diariesPerPage;
+    const indexOfFirst = indexOfLast - diariesPerPage;
+    const currentDiaries = filtered.slice(indexOfFirst, indexOfLast);
 
     const goToPage = (page) => {
         if (page < 1 || page > totalPages) return;
         setCurrentPage(page);
-    };
-
-    // 🔹 검색 버튼 눌렀을 때만 keyword 업데이트
-    const handleSearch = () => {
-        setKeyword(searchInput.trim());
     };
 
     return (
@@ -65,17 +64,17 @@ const BoardList = () => {
                 style={{
                     maxWidth: "900px",
                     margin: "0 auto",
-                    paddingBottom: "70px",
+                    paddingBottom: "70px", // FNB랑 안 겹치게 여백
                 }}
             >
                 {/* 상단 제목 */}
                 <Row className="mb-2">
                     <Col>
-                        <h5 style={{fontWeight: "bold"}}>게시판</h5>
+                        <h5 style={{fontWeight: "bold"}}>나의 일지 리스트</h5>
                     </Col>
                 </Row>
 
-                {/* 검색 영역 */}
+                {/* 검색 + 등록 버튼 */}
                 <Row className="align-items-center mb-2">
                     <Col xs="auto">
                         <Button variant="outline-dark" size="sm">
@@ -87,38 +86,40 @@ const BoardList = () => {
                             size="sm"
                             type="text"
                             placeholder="검색"
-                            value={searchInput}                          // ✅ 입력값
+                            value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                         />
                     </Col>
                     <Col xs="auto">
-                        <Button
-                            variant="dark"
-                            size="sm"
-                            onClick={handleSearch}                        // ✅ 눌러야 검색 반영
-                        >
+                        <Button variant="dark" size="sm" onClick={handleSearch}>
                             검색
                         </Button>
                     </Col>
                     <Col xs="auto" className="text-end">
+                        {/* 수정 버튼: 아래 목록에서 클릭해서 수정하라는 안내용 */}
                         <Button
-                            onClick={() => navigate("/board/write")}
-                            variant="primary"
+                            variant="outline-secondary"
                             size="sm"
-                        >
-                            등록
-                        </Button>
-                        <Button
-                            onClick={() => navigate("/board/edit")}
-                            variant="outline-primary"
-                            size="sm"
+                            className="me-1"
+                            onClick={() =>
+                                alert("수정할 일지를 아래 목록에서 클릭해주세요.")
+                            }
                         >
                             수정
+                        </Button>
+
+                        {/* 등록 버튼 */}
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => navigate("/diary/write")}
+                        >
+                            등록
                         </Button>
                     </Col>
                 </Row>
 
-                {/* 목록 영역 */}
+                {/* 리스트 테이블 */}
                 <Row className="flex-grow-1">
                     <Col className="d-flex flex-column">
                         <div
@@ -141,33 +142,37 @@ const BoardList = () => {
                                 <tr style={{backgroundColor: "#e9f3ff"}}>
                                     <th style={{width: "10%"}}>No</th>
                                     <th style={{width: "40%"}}>제목</th>
-                                    <th style={{width: "20%"}}>작성자</th>
-                                    <th style={{width: "30%"}}>등록일</th>
+                                    <th style={{width: "30%"}}>내용</th>
+                                    <th style={{width: "20%"}}>날짜</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {currentPosts.map((post) => (
+                                {currentDiaries.map((d, idx) => (
                                     <tr
-                                        key={post.id}
+                                        key={d.id}
                                         style={{cursor: "pointer"}}
-                                        onClick={() => navigate(`/board/${post.id}`)}
+                                        onClick={() => navigate(`/diary/edit/${d.id}`)}
                                     >
-                                        <td>{post.id}</td>
-                                        <td style={{textAlign: "left"}}>{post.title}</td>
-                                        <td>{post.author}</td>
-                                        <td>{post.date}</td>
+                                        <td>{indexOfFirst + idx + 1}</td>
+                                        <td style={{textAlign: "left"}}>{d.title}</td>
+                                        <td style={{textAlign: "left"}}>
+                                            {d.content.length > 15
+                                                ? d.content.slice(0, 15) + "..."
+                                                : d.content}
+                                        </td>
+                                        <td>{d.date}</td>
                                     </tr>
                                 ))}
-                                {currentPosts.length === 0 && (
+                                {currentDiaries.length === 0 && (
                                     <tr>
-                                        <td colSpan={4}>검색 결과가 없습니다.</td>
+                                        <td colSpan={4}>등록된 일지가 없습니다.</td>
                                     </tr>
                                 )}
                                 </tbody>
                             </Table>
                         </div>
 
-                        {/* 하단 페이지네이션 */}
+                        {/* 페이지네이션 */}
                         <div
                             className="mt-2 d-flex justify-content-center align-items-center"
                             style={{fontSize: "0.8rem", gap: "4px"}}
@@ -181,12 +186,14 @@ const BoardList = () => {
                                 &lt;
                             </Button>
 
-                            {Array.from({length: totalPages}, (_, idx) => idx + 1).map(
+                            {Array.from({length: totalPages}, (_, i) => i + 1).map(
                                 (page) => (
                                     <Button
                                         key={page}
                                         variant={
-                                            page === currentPage ? "secondary" : "outline-secondary"
+                                            page === currentPage
+                                                ? "secondary"
+                                                : "outline-secondary"
                                         }
                                         size="sm"
                                         onClick={() => goToPage(page)}
@@ -212,4 +219,4 @@ const BoardList = () => {
     );
 };
 
-export default BoardList;
+export default DiaryListPage;

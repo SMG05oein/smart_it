@@ -1,10 +1,18 @@
 import React from 'react';
-
+import { useNavigate } from "react-router-dom";
 const DailyList = ({currentMonth, monthTodos, handleEditTodo, handleDeleteTodo}) => {
+    const navigate = useNavigate();
     return (
         <div style={{border: "1px solid #777", borderRadius: "4px", padding: "12px", marginTop: "16px"}}>
             <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
                 나의 일지 {currentMonth + 1}월
+                {/* 🔹 여기: 나의 일지 리스트 버튼 */}
+                <button
+                    style={{ padding: "4px 8px", fontSize: "0.8rem" }}
+                    onClick={() => navigate("/diary/list")}
+                >
+                    나의 일지 리스트
+                </button>
             </div>
             {monthTodos.length === 0 ? (
                 <div style={{ color: "#777", fontSize: "0.9rem" }}>
@@ -29,22 +37,6 @@ const DailyList = ({currentMonth, monthTodos, handleEditTodo, handleDeleteTodo})
                                         item.text
                                     }`}
                                 </span>
-                            <button
-                                style={{ fontSize: "0.75rem", padding: "2px 6px" }}
-                                onClick={() => handleEditTodo(item)}
-                            >
-                                수정
-                            </button>
-                            <button
-                                style={{
-                                    fontSize: "0.75rem",
-                                    padding: "2px 6px",
-                                    marginLeft: "2px",
-                                }}
-                                onClick={() => handleDeleteTodo(item)}
-                            >
-                                삭제
-                            </button>
                         </li>
                     ))}
                 </ul>

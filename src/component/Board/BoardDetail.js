@@ -3,10 +3,23 @@ import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import BoardWrite from "./BoardWrite";
+import axios from "axios";          // ✅ 추가
 
 const dummyPosts = [
-    { id: 32, title: "강아지가 아파요", author: "user_id", date: "2025-10-10", content: "우리 강아지가 오늘부터 밥을 잘 안 먹어요..." },
-    { id: 31, title: "강아지 귀여워ㅠㅠ", author: "user_id", date: "2025-10-10", content: "사진은 나중에 올릴게요 :)" },
+    {
+        id: 32,
+        title: "강아지가 아파요",
+        author: "user_id",
+        date: "2025-10-10",
+        content: "우리 강아지가 오늘부터 밥을 잘 안 먹어요...",
+    },
+    {
+        id: 31,
+        title: "강아지 귀여워ㅠㅠ",
+        author: "user_id",
+        date: "2025-10-10",
+        content: "사진은 나중에 올릴게요 :)",
+    },
     // 필요하면 더 추가
 ];
 
@@ -17,16 +30,21 @@ const BoardDetail = () => {
     const post = dummyPosts.find((p) => p.id === postId);
 
     const [comments, setComments] = useState([
-        { id: 1, author: "user_a", content: "빨리 나았으면 좋겠어요 ㅠ", date: "2025-10-11" },
+        {
+            id: 1,
+            author: "user_a",
+            content: "빨리 나았으면 좋겠어요 ㅠ",
+            date: "2025-10-11",
+        },
     ]);
     const [commentText, setCommentText] = useState("");
 
-    if(id == 0){ // id가 없으므로 등록 페이지 보여줘야 함
-        return (
-            <BoardWrite />
-        )
+    // 0번이면 글쓰기 화면
+    if (id == 0) {
+        return <BoardWrite />;
     }
-    else if (!post) { // id는 있는데 그에 맞는 데이터가 없음
+    // id는 있는데 해당 글이 없는 경우
+    else if (!post) {
         return (
             <Container className="py-3" style={{ paddingBottom: "80px" }}>
                 <div>존재하지 않는 게시글입니다.</div>
@@ -40,7 +58,8 @@ const BoardDetail = () => {
                 </Button>
             </Container>
         );
-    }else{ // id도 있고 그게 맞는 데이터도 있음
+    } else {
+        // ✅ 댓글 추가
         const handleAddComment = () => {
             if (!commentText.trim()) return;
             const newComment = {
@@ -51,6 +70,47 @@ const BoardDetail = () => {
             };
             setComments([...comments, newComment]);
             setCommentText("");
+        };
+
+        // ✅ 게시글 삭제
+        const handleDeletePost = async () => {
+            if (!window.confirm("정말 이 글을 삭제하시겠습니까?")) return;
+
+            try {
+                console.log("▶ /deleteBoard 요청 보내는 중...", { id: postId });
+
+                const res = await axios.post(
+                    `${process.env.REACT_APP_API_URL}/api/deleteBoard`,
+                    {
+                        // ⚠️ Swagger 스키마에 맞게 key 이름 확인!
+                        // 예: { id: postId } 또는 { boardId: postId }
+                        boardid: postId,
+                    },
+                    { withCredentials: true }
+                );
+
+                console.log("▶ /deleteBoard 응답:", res);
+
+                if (
+                    res.status === 200 || res.data?.code === 200
+                ) {
+                    alert("게시글이 삭제되었습니다.");
+                    navigate("/board");
+                } else {
+                    alert("게시글 삭제에 실패했습니다.");
+                }
+            } catch (err) {
+                console.error("▶ /deleteBoard 에러:", err);
+                const status = err.response?.status;
+
+                if (status === 400) {
+                    alert("요청이 잘못되었거나 권한이 없습니다.");
+                } else if (status === 404) {
+                    alert("서버에서 해당 게시글을 찾을 수 없습니다.");
+                } else {
+                    alert("서버 오류가 발생했습니다.");
+                }
+            }
         };
 
         return (
@@ -122,7 +182,9 @@ const BoardDetail = () => {
                                 >
                                     <div style={{ fontWeight: "bold" }}>{c.author}</div>
                                     <div>{c.content}</div>
-                                    <div style={{ fontSize: "0.75rem", color: "#999" }}>
+                                    <div
+                                        style={{ fontSize: "0.75rem", color: "#999" }}
+                                    >
                                         {c.date}
                                     </div>
                                 </div>
@@ -142,9 +204,30 @@ const BoardDetail = () => {
                             onChange={(e) => setCommentText(e.target.value)}
                             style={{ fontSize: "0.85rem" }}
                         />
-                        <div className="text-end mt-2">
+                        <div className="d-flex justify-content-between mt-2">
                             <Button size="sm" onClick={handleAddComment}>
                                 댓글 등록
+                            </Button>
+
+                            {/* 🔥 글 삭제 버튼 */}
+                            <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={handleDeletePost}
+                            >
+                                글 삭제
+                            </Button>
+                            <Button
+                                variant="outline-primary"
+                                size="sm"
+                                className="ms-2"
+                                onClick={() =>
+                                    navigate(`/board/edit/${postId}`, {
+                                        state: { title: post.title, content: post.content },
+                                    })
+                                }
+                            >
+                                수정
                             </Button>
                         </div>
                     </Col>

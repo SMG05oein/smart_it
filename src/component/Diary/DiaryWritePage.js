@@ -1,20 +1,40 @@
+// src/component/Diary/DiaryWritePage.js
 import React, { useState } from "react";
-import { Container, Col, Form, Button } from "react-bootstrap";
+import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
-const BoardWrite = () => {
-    // 🔹 글쓰기 화면이 렌더링될 때마다 찍힘
-    console.log("▶ BoardWrite 컴포넌트 렌더링");
+const STORAGE_KEY = "diaryPosts";
 
+const loadDiaries = () => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+};
+
+const saveDiaries = (arr) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+};
+
+const DiaryWritePage = () => {
     const navigate = useNavigate();
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
+    // 기본값: 오늘 날짜
+    const [date, setDate] = useState(() => {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    });
 
-    // ▶ 게시글 등록
-    const handleSubmit = async () => {
-        console.log("▶ BoardWrite handleSubmit 실행됨", { title, content });
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
         if (!title.trim()) {
             alert("제목을 입력해주세요.");
@@ -24,46 +44,28 @@ const BoardWrite = () => {
             alert("내용을 입력해주세요.");
             return;
         }
-
-        try {
-            console.log("▶ /createBoard 요청 보내는 중...");
-
-            const res = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/createBoard`, // 필요하면 /api/createBoard 로 수정
-                {
-                    title: title.trim(),
-                    content: content.trim(),
-                },
-                {
-                    withCredentials: true,
-                }
-            );
-
-            console.log("▶ /createBoard 응답:", res);
-
-            // swagger 기준 201 성공
-            if (res.status === 201 || res.data?.code === 201) {
-                alert("게시글이 등록되었습니다.");
-                navigate("/board");
-            } else {
-                alert("게시글 등록에 실패했습니다.");
-            }
-        } catch (err) {
-            console.error("▶ /createBoard 에러:", err);
-            const status = err.response?.status;
-
-            if (status === 400) {
-                alert("필수 항목 누락 또는 로그인 상태가 아닙니다.");
-            } else if (status === 404) {
-                alert("서버의 /createBoard 주소를 찾을 수 없습니다.");
-            } else {
-                alert("서버 오류가 발생했습니다.");
-            }
+        if (!date) {
+            alert("날짜를 선택해주세요.");
+            return;
         }
+
+        const newDiary = {
+            id: Date.now(), // 임시 ID (백엔드 연동 시 서버에서 받은 ID로 교체)
+            title: title.trim(),
+            content: content.trim(),
+            date, // "YYYY-MM-DD"
+        };
+
+        const diaries = loadDiaries();
+        const updated = [...diaries, newDiary];
+        saveDiaries(updated);
+
+        alert("일지가 등록되었습니다.");
+        navigate("/diary/list");
     };
 
     const handleCancel = () => {
-        navigate(-1);
+        navigate(-1); // 이전 페이지로
     };
 
     return (
@@ -71,7 +73,7 @@ const BoardWrite = () => {
             <Container
                 fluid
                 className="h-100 d-flex justify-content-center align-items-center"
-                style={{ paddingTop: "24px", paddingBottom: "70px" }}
+                style={{ paddingTop: "24px", paddingBottom: "70px" }} // FNB 고려
             >
                 <Col
                     xs={12}
@@ -84,11 +86,14 @@ const BoardWrite = () => {
                         backgroundColor: "#fff",
                     }}
                 >
+                    {/* 상단 제목 */}
                     <h5 style={{ marginBottom: "16px", fontWeight: "bold" }}>
-                        게시글 등록
+                        나의 일지 등록
                     </h5>
 
-                    <Form>
+                    {/* 입력 폼 (게시판 등록 화면과 비슷하게) */}
+                    <Form onSubmit={handleSubmit}>
+                        {/* 제목 */}
                         <Form.Group className="mb-3">
                             <Form.Label style={{ fontWeight: "bold" }}>제목</Form.Label>
                             <Form.Control
@@ -100,6 +105,7 @@ const BoardWrite = () => {
                             />
                         </Form.Group>
 
+                        {/* 내용 */}
                         <Form.Group className="mb-3">
                             <Form.Label style={{ fontWeight: "bold" }}>내용</Form.Label>
                             <Form.Control
@@ -113,22 +119,23 @@ const BoardWrite = () => {
                             />
                         </Form.Group>
 
-                        <div className="d-flex justify-content-end" style={{ gap: "6px" }}>
-                            <Button
-                                variant="secondary"
+                        {/* 날짜 */}
+                        <Form.Group className="mb-3">
+                            <Form.Label style={{ fontWeight: "bold" }}>날짜</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
                                 size="sm"
-                                type="button"
-                                onClick={handleCancel}
-                            >
+                            />
+                        </Form.Group>
+
+                        {/* 하단 버튼 */}
+                        <div className="d-flex justify-content-end" style={{ gap: "6px" }}>
+                            <Button variant="secondary" size="sm" onClick={handleCancel}>
                                 취소
                             </Button>
-                            {/* 🔹 여기서 바로 handleSubmit 호출 */}
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                type="button"
-                                onClick={handleSubmit}
-                            >
+                            <Button variant="primary" size="sm" type="submit">
                                 등록
                             </Button>
                         </div>
@@ -139,4 +146,4 @@ const BoardWrite = () => {
     );
 };
 
-export default BoardWrite;
+export default DiaryWritePage;
