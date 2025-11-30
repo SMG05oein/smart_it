@@ -11,7 +11,7 @@ connection.query(query, user, (err, results) => {
 
 const mysql = require('mysql2/promise');
 
-const { getConnection } = require('../config/config');
+const { getConnection } = require('../../config/config');
 
 
 

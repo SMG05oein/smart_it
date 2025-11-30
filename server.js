@@ -3,13 +3,12 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const { connectDB, getConnection } = require('./src_back/config/config');
-const { testSql, checkId, addMember, login} = require('./src_back/sql/sql');
+const { testSql, checkId, addMember, login} = require('./src_back/sql/auth/sql');
 const cookieParser = require('cookie-parser');
 const { swaggerUi, specs } = require("./swagger/swagger")
-
+const auth = require('./src_back/auth/auth');
+const board = require('./src_back/board/board');
 const port = process.env.PORT || 8008; // 포트 설정
-
-app.use("/api/swagger", swaggerUi.serve, swaggerUi.setup(specs))
 
 // connectDB();
 
@@ -25,81 +24,16 @@ app.use(cors(corsOption));
 app.use(cookieParser());
 app.use(express.json());
 
+app.use("/api/swagger", swaggerUi.serve, swaggerUi.setup(specs))
+app.use("/api", auth);
+app.use("/api", board);
+
+
 // 4. 생성된 쿠키 확인 (request 객체의 cookies 속성으로 접근)
 app.get('/getcookie', (req, res) => {
     console.log(req.cookies);
     res.send('Check console for cookies');
 });
-
-/** 로그인, 회원가입 API 시작*/
-
-/**
- * @swagger
- * /api/checkId/{id}:
- *  get:
- *    summary: 아이디 중복 확인
- *    tags: [회원인증]
- *    parameters:
- *      - in: path
- *        name: id
- *    schema:
- *      type: string
- *      required: true
- *      description: 확인할 사용자 ID
- *    responses:
- *      "200":
- *        description: 이미 사용 중인 아이디 (status 401)
- *      "201":
- *        description: 사용 가능한 아이디 (status 200)
- */
-app.get(`/api/checkId/:id`, async (req, res) => {
-    const id = req.params.id;
-    let cc = await checkId(id);
-    let status = cc === true ? 401 : 200;
-    res.send({status: status});
-})
-
-app.post(`/api/signUp`, async (req, res) => {
-    console.log(req.body);
-    const req2 = req.body;
-    let result = await addMember(req2);
-    res.send({status: result});
-})
-
-app.post(`/api/Login`, async (req, res) => {
-    console.log(req.body);
-    const req2 = req.body;
-    let result = await login(req2);
-    let status = result === true ? 401 : 200;
-
-    res.cookie('auth', req2.userId, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 24,
-    });
-
-    res.status(200).send({status: status});
-})
-
-app.get('/Test', async (req, res) => {
-    res.cookie('testCookie', 'Temp'); // 기본 쿠키 생성
-    res.send({status: 'Sss'});
-})
-
-app.get('/api/isLogin', (req, res) => {
-    const userId = req.cookies.auth; // ⭐ 서버는 httpOnly 쿠키에 접근 가능
-    if (userId) {
-        res.status(200).json({ isLoggedIn: true, userId: userId, name: '사용자 이름' });
-    } else {
-        res.status(401).json({ isLoggedIn: false, message: '로그인 필요' });
-    }
-})
-
-app.get('/logout', (req, res) => {
-
-})
-/** 로그인, 회원가입 API 끝 */
 
 /**
  * 아래는 테스트
