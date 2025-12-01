@@ -136,8 +136,7 @@ const BoardDetail = () => {
         return (
             <Container
                 fluid
-                className="py-3"
-                style={{ paddingBottom: "80px" }}
+                className="h-100 d-flex justify-content-center align-content-center flex-column py-3"
             >
                 {/* 상단 제목 + 뒤로가기 */}
                 <Row className="mb-3">
@@ -203,62 +202,62 @@ const BoardDetail = () => {
                     </Col>
                 </Row>
 
-                {/* 댓글 리스트 */}
-                <Row className="mb-3">
-                    <Col>
-                        <h6 style={{ fontWeight: "bold", fontSize: "0.95rem" }}>댓글</h6>
-                        <div
-                            style={{
-                                border: "1px solid #eee",
-                                borderRadius: "4px",
-                                padding: "8px",
-                                maxHeight: "200px",
-                                overflowY: "auto",
-                                fontSize: "0.85rem",
-                            }}
-                        >
-                            {comments.length === 0 && (
-                                <div style={{ color: "#999" }}>아직 댓글이 없습니다.</div>
-                            )}
-                            {comments.map((c) => (
-                                <div
-                                    key={c.id}
-                                    style={{
-                                        borderBottom: "1px solid #f1f1f1",
-                                        padding: "4px 0",
-                                    }}
-                                >
-                                    <div style={{ fontWeight: "bold" }}>{c.author}</div>
-                                    <div>{c.content}</div>
-                                    <div
-                                        style={{ fontSize: "0.75rem", color: "#999" }}
-                                    >
-                                        {c.date}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </Col>
-                </Row>
+                {/*/!* 댓글 리스트 *!/*/}
+                {/*<Row className="mb-3">*/}
+                {/*    <Col>*/}
+                {/*        <h6 style={{ fontWeight: "bold", fontSize: "0.95rem" }}>댓글</h6>*/}
+                {/*        <div*/}
+                {/*            style={{*/}
+                {/*                border: "1px solid #eee",*/}
+                {/*                borderRadius: "4px",*/}
+                {/*                padding: "8px",*/}
+                {/*                maxHeight: "200px",*/}
+                {/*                overflowY: "auto",*/}
+                {/*                fontSize: "0.85rem",*/}
+                {/*            }}*/}
+                {/*        >*/}
+                {/*            {comments.length === 0 && (*/}
+                {/*                <div style={{ color: "#999" }}>아직 댓글이 없습니다.</div>*/}
+                {/*            )}*/}
+                {/*            {comments.map((c) => (*/}
+                {/*                <div*/}
+                {/*                    key={c.id}*/}
+                {/*                    style={{*/}
+                {/*                        borderBottom: "1px solid #f1f1f1",*/}
+                {/*                        padding: "4px 0",*/}
+                {/*                    }}*/}
+                {/*                >*/}
+                {/*                    <div style={{ fontWeight: "bold" }}>{c.author}</div>*/}
+                {/*                    <div>{c.content}</div>*/}
+                {/*                    <div*/}
+                {/*                        style={{ fontSize: "0.75rem", color: "#999" }}*/}
+                {/*                    >*/}
+                {/*                        {c.date}*/}
+                {/*                    </div>*/}
+                {/*                </div>*/}
+                {/*            ))}*/}
+                {/*        </div>*/}
+                {/*    </Col>*/}
+                {/*</Row>*/}
 
-                {/* 댓글 입력 */}
-                <Row>
-                    <Col>
-                        <Form.Control
-                            as="textarea"
-                            rows={2}
-                            placeholder="댓글을 입력하세요"
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            style={{ fontSize: "0.85rem" }}
-                        />
-                        <div className="d-flex justify-content-between mt-2">
-                            <Button size="sm" onClick={handleAddComment}>
-                                댓글 등록
-                            </Button>
-                        </div>
-                    </Col>
-                </Row>
+                {/*/!* 댓글 입력 *!/*/}
+                {/*<Row>*/}
+                {/*    <Col>*/}
+                {/*        <Form.Control*/}
+                {/*            as="textarea"*/}
+                {/*            rows={2}*/}
+                {/*            placeholder="댓글을 입력하세요"*/}
+                {/*            value={commentText}*/}
+                {/*            onChange={(e) => setCommentText(e.target.value)}*/}
+                {/*            style={{ fontSize: "0.85rem" }}*/}
+                {/*        />*/}
+                {/*        <div className="d-flex justify-content-between mt-2">*/}
+                {/*            <Button size="sm" onClick={handleAddComment}>*/}
+                {/*                댓글 등록*/}
+                {/*            </Button>*/}
+                {/*        </div>*/}
+                {/*    </Col>*/}
+                {/*</Row>*/}
             </Container>
         );
     }

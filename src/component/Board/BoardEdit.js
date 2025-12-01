@@ -25,7 +25,7 @@ const BoardEdit = () => {
                     alert("비정상적인 접근입니다.");
                     navigate("/board");
                     return 0;
-                };
+                }
             })
     })
 
