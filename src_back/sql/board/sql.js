@@ -55,8 +55,9 @@ async function getBoard(boardId) {
     let con;
     const selectSql = `
         SELECT *
-        FROM board
-        WHERE board_id = ?
+        FROM board b
+        inner join members m ON m.members_id = b.fk_members_id
+        WHERE b.board_id = ?
     `;
 
     try {

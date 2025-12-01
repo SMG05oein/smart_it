@@ -1,5 +1,5 @@
 // src/component/Board/BoardDetail.js
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import BoardWrite from "./BoardWrite";
@@ -38,13 +38,26 @@ const BoardDetail = () => {
         },
     ]);
     const [commentText, setCommentText] = useState("");
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        axios.get(`${process.env.REACT_APP_API_URL}/api/board/${postId}`)
+            .then(res => {
+                let r = res.data;
+                console.log("details data: ",r);
+                setData(r.data);
+            }).catch(error => {
+                console.log(error);
+        })
+    },[])
+
 
     // 0번이면 글쓰기 화면
     if (id == 0) {
         return <BoardWrite />;
     }
+
     // id는 있는데 해당 글이 없는 경우
-    else if (!post) {
+    if (!data) {
         return (
             <Container className="py-3" style={{ paddingBottom: "80px" }}>
                 <div>존재하지 않는 게시글입니다.</div>
@@ -84,7 +97,7 @@ const BoardDetail = () => {
                     {
                         // ⚠️ Swagger 스키마에 맞게 key 이름 확인!
                         // 예: { id: postId } 또는 { boardId: postId }
-                        boardid: postId,
+                        boardId: postId,
                     },
                     { withCredentials: true }
                 );
@@ -122,17 +135,9 @@ const BoardDetail = () => {
                 {/* 상단 제목 + 뒤로가기 */}
                 <Row className="mb-3">
                     <Col>
-                        <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            className="mb-2"
-                            onClick={() => navigate("/board")}
-                        >
-                            &lt; 목록
-                        </Button>
-                        <h5 style={{ fontWeight: "bold" }}>{post.title}</h5>
+                        <h5 style={{ fontWeight: "bold" }}>제목: {data.title}</h5>
                         <div style={{ fontSize: "0.85rem", color: "#666" }}>
-                            {post.author} · {post.date}
+                            작성자: {data.user_id} <br/> 작성일: {data.board_reg_date?.substring(0, 10)} · 수정일: {data.board_update_date?.substring(0, 10)}
                         </div>
                     </Col>
                 </Row>
@@ -150,8 +155,40 @@ const BoardDetail = () => {
                                 whiteSpace: "pre-wrap",
                             }}
                         >
-                            {post.content || "여기에 게시글 내용이 들어갑니다."}
+                            {data.contents || "여기에 게시글 내용이 들어갑니다."}
                         </div>
+                    </Col>
+                </Row>
+                <Row className="mb-4 ">
+                    <Col style={{display: "flex", gap: "1rem", justifyContent: "right"}}>
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            className="ms-2"
+                            onClick={() => navigate("/board")}
+                        >
+                            &lt; 목록
+                        </Button>
+                        {/* 🔥 글 삭제 버튼 */}
+                        <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={handleDeletePost}
+                        >
+                            글 삭제
+                        </Button>
+                        <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="ms-2"
+                            onClick={() =>
+                                navigate(`/board/edit/${postId}`, {
+                                    state: { title: data.title, content: data.contents },
+                                })
+                            }
+                        >
+                            수정
+                        </Button>
                     </Col>
                 </Row>
 
@@ -207,27 +244,6 @@ const BoardDetail = () => {
                         <div className="d-flex justify-content-between mt-2">
                             <Button size="sm" onClick={handleAddComment}>
                                 댓글 등록
-                            </Button>
-
-                            {/* 🔥 글 삭제 버튼 */}
-                            <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={handleDeletePost}
-                            >
-                                글 삭제
-                            </Button>
-                            <Button
-                                variant="outline-primary"
-                                size="sm"
-                                className="ms-2"
-                                onClick={() =>
-                                    navigate(`/board/edit/${postId}`, {
-                                        state: { title: post.title, content: post.content },
-                                    })
-                                }
-                            >
-                                수정
                             </Button>
                         </div>
                     </Col>
