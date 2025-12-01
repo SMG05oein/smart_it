@@ -261,12 +261,36 @@ router.post('/updateBoard', async (req, res) => {
  */
 router.get('/boardAll/:page', async (req, res) => {
     const page = parseInt(req.params.page) || 1;
+    const keyword = req.params.keyword || "";
     if (page < 1) {
         return res.status(400).json({ status: 400, message: '유효하지 않은 페이지 번호입니다.' });
     }
 
     try{
-        const data = await getBoardAll(page);
+        const data = await getBoardAll(page, '');
+
+        if(!data) {
+            return res.status(500).json({ status: 500, message: '게시글 조회 중 서버 내부 오류가 발생했습니다.' });
+        }
+        if (data.length === 0 && page > 1) {
+            return res.status(404).json({ status: 404, message: '요청하신 페이지에 게시글이 없습니다.' });
+        }
+        res.status(200).json({ status: 200, data: data, page: page, pageSize: 10 });
+    }catch(err){
+        console.error(err);
+        res.status(500).json({ status: 500, message: '서버 오류' });
+    }
+})
+
+router.get('/boardAll/:page/:keyword', async (req, res) => {
+    const page = parseInt(req.params.page) || 1;
+    const keyword = req.params.keyword || "";
+    if (page < 1) {
+        return res.status(400).json({ status: 400, message: '유효하지 않은 페이지 번호입니다.' });
+    }
+
+    try{
+        const data = await getBoardAll(page, keyword);
 
         if(!data) {
             return res.status(500).json({ status: 500, message: '게시글 조회 중 서버 내부 오류가 발생했습니다.' });
