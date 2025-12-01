@@ -19,7 +19,6 @@ import DiaryWritePage from "./component/Diary/DiaryWritePage";
 import DiaryEditPage from "./component/Diary/DiaryEditPage";
 
 
-
 function App() {
     return (
         <Routes>

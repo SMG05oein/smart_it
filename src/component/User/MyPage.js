@@ -63,13 +63,13 @@ const MyPage = () => {
                 {/* 버튼들 */}
                 <Row className="mt-3">
                     <Col className="d-flex justify-content-center" style={{ gap: "10px" }}>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => navigate(-1)}
-                        >
-                            뒤로가기
-                        </Button>
+                        {/*<Button*/}
+                        {/*    variant="secondary"*/}
+                        {/*    size="sm"*/}
+                        {/*    onClick={() => navigate(-1)}*/}
+                        {/*>*/}
+                        {/*    뒤로가기*/}
+                        {/*</Button>*/}
                         <Button
                             variant="primary"
                             size="sm"

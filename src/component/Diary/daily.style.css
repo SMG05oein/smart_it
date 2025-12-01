@@ -1,0 +1,40 @@
+tbody td{
+    height: 56.7px !important;
+    vertical-align: middle;
+    /*display: flex !important;*/
+    /*flex-direction: column !important;*/
+    /*justify-content: center!important;*/
+    /*text-align: center!important;*/
+    /*min-height: 10.65% !important;*/
+    /*max-height: 10.65%!important;*/
+}
+
+td span{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+tbody tr{
+    width: 100%  !important;
+}
+
+tbody td{
+}
+
+/* 일요일 */
+.cal-sunday {
+    color: red !important;
+}
+
+/* 토요일 */
+.cal-saturday {
+    color: blue !important;
+}
+
+/* 일지 있는 날짜 */
+.cal-has-todo {
+    background-color: rgba(67, 255, 0, 0.53) !important;
+    color: black !important;
+    /*border-radius: 50% !important;*/
+}

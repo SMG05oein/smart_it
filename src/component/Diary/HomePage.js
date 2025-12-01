@@ -1,25 +1,16 @@
-// src/component/homepage/HomePage.js
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useState, useEffect } from "react";
 import DailyList from "./DailyList";
-
-const STORAGE_KEY = "diaryPosts";
+import axios from "axios";
 
 function Homepage() {
-    // 캘린더에 선택된 날짜
     const [selectedDate, setSelectedDate] = useState(new Date());
-
-    // 현재 보고 있는 달의 시작 날짜
     const [activeStartDate, setActiveStartDate] = useState(new Date());
 
-    // 🔹 이 달에 해당하는 일지 목록 (나의 11월 일지 박스용)
-    const [monthTodos, setMonthTodos] = useState([]);
+    const [monthTodos, setMonthTodos] = useState([]); // 아래 리스트용
+    const [diaryDateKeys, setDiaryDateKeys] = useState([]); // 캘린더 색칠용
 
-    // 🔹 일지가 있는 날짜들 (캘린더 초록색 표시용)
-    const [diaryDateKeys, setDiaryDateKeys] = useState([]);
-
-    // 날짜 -> "YYYY-MM-DD"
     const getDateKey = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -28,54 +19,67 @@ function Homepage() {
     };
 
     const currentYear = activeStartDate.getFullYear();
-    const currentMonth = activeStartDate.getMonth(); // 0~11
+    const currentMonth = activeStartDate.getMonth() + 1; // 서버는 1~12 사용
 
-    // 🔸 홈 화면이 켜질 때 + 보고 있는 달이 바뀔 때마다 localStorage에서 읽어오기
-    useEffect(() => {
+    // 서버에서 해당 월의 일지 목록 가져오기 (안전 처리 포함)
+    const fetchMonthlyDiaries = async () => {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            const arr = raw ? JSON.parse(raw) : [];
-
-            const items = [];
-            const dateSet = new Set(); // 캘린더 색칠용
-
-            arr.forEach((d) => {
-                if (!d.date) return;
-
-                // 날짜 문자열 모아두기 (예: "2025-11-30")
-                dateSet.add(d.date);
-
-                // "YYYY-MM-DD" → Date 객체
-                const [y, m, day] = d.date.split("-").map(Number);
-                const dateObj = new Date(y, m - 1, day);
-
-                // 지금 보고 있는 달에 해당하는 것만 '나의 11월 일지' 리스트에 포함
-                if (
-                    dateObj.getFullYear() === currentYear &&
-                    dateObj.getMonth() === currentMonth
-                ) {
-                    items.push({
-                        date: dateObj,     // Date 객체 (표시용)
-                        text: d.title,     // 일지 제목
-                        key: d.date,       // 고유 키로 날짜 문자열 사용
-                        idxInDay: 0,       // (예전 구조 맞추기용, 지금은 의미 없음)
-                    });
+            const res = await axios.get(
+                `${process.env.REACT_APP_API_URL}/api/daily/${currentYear}/${currentMonth}`,
+                {
+                    withCredentials: true
                 }
+            );
+
+            console.log("fetchMonthlyDiaries response:", res.data);
+            let diaryList = res.data.data;
+
+            // diaryList가 배열이 아니면 빈 배열로 처리
+            if (!Array.isArray(diaryList)) diaryList = [];
+            // 캘린더에 표시할 날짜들 및 리스트 아이템 준비
+            const dateSet = new Set();
+            const items = [];
+
+            diaryList.forEach((item) => {
+                // 방어코드: item.use_date 혹은 item.date 혹은 item.useDate 등 가능성 체크
+                const dateStr = item.use_date || item.date || item.useDate || null;
+                if (!dateStr) return;
+
+                // 간단 포맷 보정: "YYYY-MM-DD" 형태가 아니면 시도
+                const parts = String(dateStr).split("-").map(Number);
+                if (parts.length < 3) return;
+
+                const [y, m, d] = parts;
+                const dateObj = new Date(y, m - 1, d);
+
+                dateSet.add(`${String(y).padStart(4,"0")}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+
+                items.push({
+                    date: dateObj,
+                    text: item.title || item.name || "",
+                    key: `${String(y).padStart(4,"0")}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`,
+                    idxInDay: 0,
+                    raw: item
+                });
             });
 
-            // 날짜 오름차순 정렬
             items.sort((a, b) => a.date - b.date);
 
-            setMonthTodos(items);
-            setDiaryDateKeys(Array.from(dateSet));
-        } catch (e) {
-            console.error(e);
-        }
-    }, [currentYear, currentMonth]);
+            setDiaryDateKeys(diaryList);
+            setMonthTodos(diaryList);
 
-    // 지금은 홈 화면에서 바로 수정/삭제 안 쓸 거라서 일단 빈 함수로 둠
-    const handleEditTodo = () => {};
-    const handleDeleteTodo = () => {};
+        } catch (err) {
+            console.error("📛 월간 일지 조회 실패:", err);
+            setDiaryDateKeys([]);
+            setMonthTodos([]);
+        }
+    };
+    console.log(diaryDateKeys);
+    console.log(monthTodos);
+    // 보고 있는 달이 바뀌면 서버에서 다시 가져오기
+    useEffect(() => {
+        fetchMonthlyDiaries();
+    }, [currentYear, currentMonth]);
 
     return (
         <div
@@ -91,7 +95,6 @@ function Homepage() {
                     border: "1px solid #777",
                     borderRadius: "4px",
                     padding: "16px",
-                    boxSizing: "border-box",
                     display: "flex",
                     justifyContent: "center",
                 }}
@@ -109,15 +112,19 @@ function Homepage() {
                     }
                     tileClassName={({ date, view }) => {
                         if (view !== "month") return null;
-                        const classes = [];
-
-                        const day = date.getDay();
-                        if (day === 0) classes.push("cal-sunday");    // 일요일
-                        if (day === 6) classes.push("cal-saturday");  // 토요일
 
                         const key = getDateKey(date);
+                        const classes = [];
 
-                        // 🔹 이 날짜에 일지가 하나라도 있으면 초록색 표시
+                        if (date.getDay() === 0) classes.push("cal-sunday");
+                        if (date.getDay() === 6) classes.push("cal-saturday");
+
+                        // 해당 날짜에 일지가 있으면 초록색
+                        diaryDateKeys.forEach((k) => {
+                            if(k.use_date_local.includes(key)){
+                                classes.push("cal-has-todo");
+                            }
+                        })
                         if (diaryDateKeys.includes(key)) {
                             classes.push("cal-has-todo");
                         }
@@ -129,10 +136,10 @@ function Homepage() {
 
             {/* 아래 나의 일지 리스트 */}
             <DailyList
-                currentMonth={currentMonth}
+                currentMonth={currentMonth - 1}
                 monthTodos={monthTodos}
-                handleEditTodo={handleEditTodo}
-                handleDeleteTodo={handleDeleteTodo}
+                handleEditTodo={() => {}}
+                handleDeleteTodo={() => {}}
             />
         </div>
     );
