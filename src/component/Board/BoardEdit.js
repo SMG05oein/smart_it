@@ -1,5 +1,5 @@
 // src/component/Board/BoardEdit.js
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Container, Col, Form, Button } from "react-bootstrap";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -9,7 +9,18 @@ const BoardEdit = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // 상세 페이지에서 넘어올 때 제목/내용을 같이 넘겨줄 예정
+    useEffect(() => {
+        axios.post(`${process.env.REACT_APP_API_URL}/api/isMe`, {boardId: id}, {withCredentials: true})
+            .then((res) => {
+                let r = res.data;
+                if(!(r.isMe)){
+                    alert("비정상적인 접근입니다.");
+                    navigate("/board");
+                };
+            })
+    })
+
+        // 상세 페이지에서 넘어올 때 제목/내용을 같이 넘겨줄 예정
     const initialPost = location.state || { title: "", content: "" };
 
     const [title, setTitle] = useState(initialPost.title);

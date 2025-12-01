@@ -39,7 +39,14 @@ const BoardDetail = () => {
     ]);
     const [commentText, setCommentText] = useState("");
     const [data, setData] = useState([]);
+    const [isMe, setIsMe] = useState(false);
     useEffect(() => {
+        axios.post(`${process.env.REACT_APP_API_URL}/api/isMe`,{boardId: postId},{withCredentials: true})
+            .then((res) => {
+                let r = res.data;
+                setIsMe(r.isMe);
+            })
+
         axios.get(`${process.env.REACT_APP_API_URL}/api/board/${postId}`)
             .then(res => {
                 let r = res.data;
@@ -170,25 +177,29 @@ const BoardDetail = () => {
                             &lt; 목록
                         </Button>
                         {/* 🔥 글 삭제 버튼 */}
-                        <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={handleDeletePost}
-                        >
-                            글 삭제
-                        </Button>
-                        <Button
-                            variant="outline-primary"
-                            size="sm"
-                            className="ms-2"
-                            onClick={() =>
-                                navigate(`/board/edit/${postId}`, {
-                                    state: { title: data.title, content: data.contents },
-                                })
-                            }
-                        >
-                            수정
-                        </Button>
+                        {isMe && (
+                            <>
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={handleDeletePost}
+                                >
+                                    글 삭제
+                                </Button>
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    className="ms-2"
+                                    onClick={() =>
+                                        navigate(`/board/edit/${postId}`, {
+                                            state: { title: data.title, content: data.contents },
+                                        })
+                                    }
+                                >
+                                    수정
+                                </Button>
+                            </>
+                        )}
                     </Col>
                 </Row>
 

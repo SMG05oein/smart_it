@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { checkId, addMember, login } = require("../sql/auth/sql");
+const { checkId, addMember, login, isMe } = require("../sql/auth/sql");
 
 /** 로그인, 회원가입 API 시작*/
 
@@ -238,6 +238,91 @@ router.get('/logout', (req, res) => {
     res.clearCookie('auth');
     res.status(200).json({ status: "logout success" });
 });
+
+/**
+ * @swagger
+ * /isMe:
+ *   post:
+ *     tags: [회원인증]
+ *     summary: 특정 게시글의 작성자가 나인지 확인
+ *     description: |
+ *       JSON으로 전달한 `boardId`와 쿠키의 `auth`(user_id)를 비교하여
+ *       해당 게시글의 작성자가 로그인한 사용자 본인인지 확인합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               boardId:
+ *                 type: integer
+ *                 example: 10
+ *     responses:
+ *       200:
+ *         description: 본인 여부 확인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: number
+ *                   example: 200
+ *                 isMe:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "본인입니다."
+ *       400:
+ *         description: boardId 없거나 잘못된 요청
+ *       401:
+ *         description: 로그인되어 있지 않음
+ *       404:
+ *         description: 게시글이 존재하지 않음
+ *       500:
+ *         description: 서버 오류
+ */
+router.post('/isMe', async (req, res) => {
+    const userId = req.cookies.auth;
+    const { boardId } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ status: 401, message: '로그인이 되어 있지 않습니다.' });
+    }
+
+    if (!boardId) {
+        return res.status(400).json({ status: 400, message: 'boardId가 필요합니다.' });
+    }
+
+    try {
+        const data = await isMe(boardId);
+
+        if (!data) {
+            return res.status(404).json({
+                status: 404,
+                message: '게시글을 찾을 수 없습니다.'
+            });
+        }
+
+        const isMine = data.user_id === userId;
+
+        return res.status(200).json({
+            status: 200,
+            isMe: isMine,
+            message: isMine ? '본인입니다.' : '본인이 아닙니다.'
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            status: 500,
+            message: '서버 오류'
+        });
+    }
+});
+
 
 /** 로그인, 회원가입 API 끝 */
 
