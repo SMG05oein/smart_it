@@ -282,6 +282,77 @@ router.get('/boardAll/:page', async (req, res) => {
     }
 })
 
+/**
+ * @swagger
+ * /boardAll/{page}/{keyword}:
+ *   get:
+ *     tags: [게시글]
+ *     summary: 게시글 검색 조회 (페이지 + 키워드)
+ *     description: |
+ *       검색 키워드를 포함한 게시글 목록을 조회합니다.
+ *       제목 또는 내용에 키워드가 포함된 게시글만 반환합니다.
+ *     parameters:
+ *       - in: path
+ *         name: page
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: 조회할 페이지 번호
+ *       - in: path
+ *         name: keyword
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "공지"
+ *         description: 검색할 키워드 (제목/내용 포함)
+ *     responses:
+ *       200:
+ *         description: 검색된 게시글 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 7
+ *                       title:
+ *                         type: string
+ *                         example: "공지사항 안내"
+ *                       contents:
+ *                         type: string
+ *                         example: "공지 관련된 내용을 안내드립니다"
+ *                       user:
+ *                         type: string
+ *                         example: "admin01"
+ *                       createdAt:
+ *                         type: string
+ *                         example: "2025-12-01 15:22:00"
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 10
+ *                 keyword:
+ *                   type: string
+ *                   example: "공지"
+ *       400:
+ *         description: 잘못된 페이지 번호
+ *       404:
+ *         description: 해당 페이지에 검색 결과 없음
+ *       500:
+ *         description: 서버 오류
+ */
 router.get('/boardAll/:page/:keyword', async (req, res) => {
     const page = parseInt(req.params.page) || 1;
     const keyword = req.params.keyword || "";
