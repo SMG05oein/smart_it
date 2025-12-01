@@ -7,8 +7,8 @@ const DailyList = ({currentMonth, monthTodos, handleEditTodo, handleDeleteTodo})
             <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
                 나의 일지 {currentMonth + 1}월
                 {/* 🔹 여기: 나의 일지 리스트 버튼 */}
-                <button
-                    style={{ padding: "4px 8px", fontSize: "0.8rem" }}
+                <button className={"btn btn-sm btn-outline-info"}
+                    style={{ padding: "4px 8px", fontSize: "0.8rem", marginLeft: "8px" }}
                     onClick={() => navigate("/diary/list")}
                 >
                     나의 일지 리스트
