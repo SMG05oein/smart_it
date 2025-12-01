@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./board.style.css"
 
 // 필요 없으면 []로 두고 써도 됨
 const dummyPosts = [
@@ -134,7 +135,7 @@ const BoardList = () => {
                 // 서버에서 받은 페이지로 동기화 (선택 사항)
                 setCurrentPage(result.page);
 
-                console.log(result);
+                console.log("data: ",result);
             })
             .catch(error => {
                 console.error("게시글 조회 실패:", error);
@@ -153,146 +154,144 @@ const BoardList = () => {
 
     return (
         // 🔹 Section을 써서 화면 높이 꽉 채우기
-        <div className="Section">
-            <Container
-                fluid
-                className="h-100 d-flex flex-column py-3"
-                style={{
-                    maxWidth: "900px",   // 전체 폭
-                    margin: "0 auto",
-                    paddingBottom: "70px", // FNB 만큼 여백
-                }}
-            >
-                {/* 상단 제목 */}
-                <Row className="mb-2">
-                    <Col>
-                        <h5 style={{ fontWeight: "bold" }}>게시판</h5>
-                    </Col>
-                </Row>
+        <Container
+            fluid
+            className="h-100 d-flex flex-column py-3"
+            style={{
+                maxWidth: "900px",   // 전체 폭
+                margin: "0 auto",
+                paddingBottom: "70px", // FNB 만큼 여백
+            }}
+        >
+            {/* 상단 제목 */}
+            <Row className="mb-2">
+                <Col>
+                    <h5 style={{ fontWeight: "bold" }}>게시판</h5>
+                </Col>
+            </Row>
 
-                {/* 검색 영역 */}
-                <Row className="align-items-center mb-2">
-                    <Col xs="auto">
-                        <Button variant="outline-dark" size="sm">
-                            제목 &gt;
-                        </Button>
-                    </Col>
-                    <Col xs>
-                        <Form.Control
+            {/* 검색 영역 */}
+            <Row className="align-items-center mb-2">
+                <Col xs="auto">
+                    <Button variant="outline-dark" size="sm">
+                        제목 &gt;
+                    </Button>
+                </Col>
+                <Col xs>
+                    <Form.Control
+                        size="sm"
+                        type="text"
+                        placeholder="검색"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                    />
+                </Col>
+                <Col xs="auto">
+                    <Button variant="dark" size="sm" onClick={()=>{setKeyword('')}}>
+                        초기화
+                    </Button>
+                </Col>
+                <Col xs="auto" className="text-end">
+                    <Button onClick={()=>navigate("/board/0")} variant="primary" size="sm">
+                        등록
+                    </Button>
+                </Col>
+            </Row>
+
+            {/* 🔹 가운데 영역을 flex-grow로 키워서 화면을 꽉 채움 */}
+            <Row className="flex-grow-1 h-100">
+                <Col className="d-flex flex-column h-100">
+                    {/* 테이블 박스 (세로로 넓게) */}
+                    <div className="w-100"
+                        style={{
+                            border: "1px solid #007bff",
+                            borderRadius: "4px",
+                            overflow: "hidden",
+                            flexGrow: 1,           // 남는 세로 공간 채우기
+                        }}
+                    >
+                        <Table
+                            bordered
+                            hover
                             size="sm"
-                            type="text"
-                            placeholder="검색"
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
-                        />
-                    </Col>
-                    <Col xs="auto">
-                        <Button variant="dark" size="sm" onClick={()=>{setKeyword('')}}>
-                            초기화
-                        </Button>
-                    </Col>
-                    <Col xs="auto" className="text-end">
-                        <Button onClick={()=>navigate("/board/0")} variant="primary" size="sm">
-                            등록
-                        </Button>
-                    </Col>
-                </Row>
-
-                {/* 🔹 가운데 영역을 flex-grow로 키워서 화면을 꽉 채움 */}
-                <Row className="flex-grow-1">
-                    <Col className="d-flex flex-column">
-                        {/* 테이블 박스 (세로로 넓게) */}
-                        <div
-                            style={{
-                                border: "1px solid #007bff",
-                                borderRadius: "4px",
-                                overflow: "hidden",
-                                flexGrow: 1,           // 남는 세로 공간 채우기
-                                minHeight: "280px",    // 최소 높이
-                            }}
+                            className="mb-0"
+                            style={{ textAlign: "center", fontSize: "0.85rem" }}
                         >
-                            <Table
-                                bordered
-                                hover
-                                size="sm"
-                                className="mb-0 h-100"
-                                style={{ textAlign: "center", fontSize: "0.85rem" }}
-                            >
-                                <thead>
-                                <tr style={{ backgroundColor: "#e9f3ff" }}>
-                                    <th style={{ width: "10%" }}>No</th>
-                                    <th style={{ width: "40%" }}>제목</th>
-                                    <th style={{ width: "20%" }}>작성자</th>
-                                    <th style={{ width: "30%" }}>등록일</th>
+                            <thead>
+                            <tr style={{ backgroundColor: "#e9f3ff" }}>
+                                <th style={{ width: "10%" }}>No</th>
+                                <th style={{ width: "40%" }}>제목</th>
+                                <th style={{ width: "20%" }}>작성자</th>
+                                <th style={{ width: "30%" }}>등록일</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {data.map((d, idx) => (
+                                <tr
+                                    key={d.board_id}
+                                    style={{ cursor: "pointer" }}
+                                    className="align-middle"
+                                    // onClick={() => navigate(`/board/${d.board_id}`)}
+                                >
+                                    <td style={{verticalAlign: "middle"}}><span>{totalContent - (currentPage - 1) * 10 - idx}</span></td>
+                                    <td style={{verticalAlign: "middle"}} onClick={() => navigate(`/board/${d.board_id}`)}><span>{d.title}</span></td>
+                                    <td style={{verticalAlign: "middle"}}><span>{d.user_id}</span></td>
+                                    <td style={{verticalAlign: "middle"}}><span>{d.board_reg_date ? d.board_reg_date.substring(0, 10) : '날짜 없음'}</span></td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                {data.map((d, idx) => (
-                                    <tr
-                                        key={d.board_id}
-                                        style={{ cursor: "pointer" }}
-                                        // onClick={() => navigate(`/board/${d.board_id}`)}
-                                    >
-                                        <td>{totalContent - (currentPage - 1) * 10 - idx}</td>
-                                        <td style={{ textAlign: "left" }} onClick={() => navigate(`/board/${d.board_id}`)}>{d.title}</td>
-                                        <td>{d.user_id}</td>
-                                        <td>{d.board_reg_date ? d.board_reg_date.substring(0, 10) : '날짜 없음'}</td>
-                                    </tr>
-                                ))}
-                                {data.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4}>검색 결과가 없습니다.</td>
-                                    </tr>
-                                )}
-                                </tbody>
-                            </Table>
-                        </div>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        {/* 하단 페이지네이션 */}
-                        <div
-                            className="mt-2 d-flex justify-content-center align-items-center"
-                            style={{ fontSize: "0.8rem", gap: "4px" }}
-                        >
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={() => goToPage(currentPage - 1)}
-                                disabled={currentPage === 1}
-                            >
-                                &lt;
-                            </Button>
-
-                            {Array.from({ length: totalPage  }, (_, idx) => idx + 1).map(
-                                (p) => (
-                                    <Button
-                                        key={p}
-                                        variant={
-                                            p === currentPage ? "secondary" : "outline-secondary"
-                                        }
-                                        size="sm"
-                                        onClick={() => goToPage(p)}
-                                    >
-                                        {p}
-                                    </Button>
-                                )
+                            ))}
+                            {data.length === 0 && (
+                                <tr>
+                                    <td colSpan={4}>검색 결과가 없습니다.</td>
+                                </tr>
                             )}
+                            </tbody>
+                        </Table>
+                    </div>
+                </Col>
+            </Row>
+            <Row className={"mt-2"}>
+                <Col>
+                    {/* 하단 페이지네이션 */}
+                    <div
+                        className="mt-2 d-flex justify-content-center align-items-center"
+                        style={{ fontSize: "0.8rem", gap: "4px" }}
+                    >
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => goToPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                        >
+                            &lt;
+                        </Button>
 
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={() => goToPage(currentPage + 1)}
-                                disabled={currentPage === totalPage}
-                            >
-                                &gt;
-                            </Button>
-                        </div>
-                    </Col>
-                </Row>
-            </Container>
-        </div>
+                        {Array.from({ length: totalPage  }, (_, idx) => idx + 1).map(
+                            (p) => (
+                                <Button
+                                    key={p}
+                                    variant={
+                                        p === currentPage ? "secondary" : "outline-secondary"
+                                    }
+                                    size="sm"
+                                    onClick={() => goToPage(p)}
+                                >
+                                    {p}
+                                </Button>
+                            )
+                        )}
+
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => goToPage(currentPage + 1)}
+                            disabled={currentPage === totalPage}
+                        >
+                            &gt;
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
+        </Container>
     );
 };
 

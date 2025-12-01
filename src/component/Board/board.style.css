@@ -1,0 +1,23 @@
+tbody td{
+    height: 55.9px !important;
+    vertical-align: middle;
+    /*display: flex !important;*/
+    /*flex-direction: column !important;*/
+    /*justify-content: center!important;*/
+    /*text-align: center!important;*/
+    /*min-height: 10.65% !important;*/
+    /*max-height: 10.65%!important;*/
+}
+
+td span{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+tbody tr{
+    width: 100%  !important;
+}
+
+tbody td{
+}
