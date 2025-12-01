@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { insertBoard, deleteBoard, getBoard, updateBoard } = require("../sql/board/sql");
+const { insertBoard, deleteBoard, getBoard, updateBoard, getBoardAll } = require("../sql/board/sql");
 
 /**
  * @swagger
@@ -158,5 +158,222 @@ router.post('/updateBoard', async (req, res) => {
         res.status(500).json({ status: 500, message: '서버 오류' });
     }
 });
+
+/**
+ * @swagger
+ * /boardAll/{page}:
+ *   get:
+ *     tags: [게시글]
+ *     summary: 게시글 전체 조회 (페이지네이션)
+ *     description: |
+ *       페이지 번호를 입력하여 게시글 목록을 조회합니다.
+ *       한 페이지 당 10개의 게시글을 제공합니다.
+ *     parameters:
+ *       - in: path
+ *         name: page
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: 조회할 페이지 번호 (1 이상)
+ *     responses:
+ *       200:
+ *         description: 게시글 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 data:
+ *                   type: array
+ *                   description: 게시글 목록
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: 게시글 ID
+ *                         example: 12
+ *                       title:
+ *                         type: string
+ *                         description: 제목
+ *                         example: "게시글 제목입니다"
+ *                       contents:
+ *                         type: string
+ *                         description: 내용
+ *                         example: "게시글 본문 내용입니다."
+ *                       user:
+ *                         type: string
+ *                         description: 작성자 ID 또는 이름
+ *                         example: "testUser"
+ *                       createdAt:
+ *                         type: string
+ *                         description: 작성일
+ *                         example: "2025-11-30 12:00:00"
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 10
+ *       400:
+ *         description: 유효하지 않은 페이지 번호 요청
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: 유효하지 않은 페이지 번호입니다.
+ *       404:
+ *         description: 요청한 페이지에 게시글이 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: 요청하신 페이지에 게시글이 없습니다.
+ *       500:
+ *         description: 서버 내부 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: 게시글 조회 중 서버 내부 오류가 발생했습니다.
+ */
+router.get('/boardAll/:page', async (req, res) => {
+    const page = parseInt(req.params.page) || 1;
+    const keyword = req.params.keyword || "";
+    if (page < 1) {
+        return res.status(400).json({ status: 400, message: '유효하지 않은 페이지 번호입니다.' });
+    }
+
+    try{
+        const data = await getBoardAll(page, '');
+
+        if(!data) {
+            return res.status(500).json({ status: 500, message: '게시글 조회 중 서버 내부 오류가 발생했습니다.' });
+        }
+        if (data.length === 0 && page > 1) {
+            return res.status(404).json({ status: 404, message: '요청하신 페이지에 게시글이 없습니다.' });
+        }
+        res.status(200).json({ status: 200, data: data, page: page, pageSize: 10 });
+    }catch(err){
+        console.error(err);
+        res.status(500).json({ status: 500, message: '서버 오류' });
+    }
+})
+
+/**
+ * @swagger
+ * /boardAll/{page}/{keyword}:
+ *   get:
+ *     tags: [게시글]
+ *     summary: 게시글 검색 조회 (페이지 + 키워드)
+ *     description: |
+ *       검색 키워드를 포함한 게시글 목록을 조회합니다.
+ *       제목 또는 내용에 키워드가 포함된 게시글만 반환합니다.
+ *     parameters:
+ *       - in: path
+ *         name: page
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: 조회할 페이지 번호
+ *       - in: path
+ *         name: keyword
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "공지"
+ *         description: 검색할 키워드 (제목/내용 포함)
+ *     responses:
+ *       200:
+ *         description: 검색된 게시글 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 7
+ *                       title:
+ *                         type: string
+ *                         example: "공지사항 안내"
+ *                       contents:
+ *                         type: string
+ *                         example: "공지 관련된 내용을 안내드립니다"
+ *                       user:
+ *                         type: string
+ *                         example: "admin01"
+ *                       createdAt:
+ *                         type: string
+ *                         example: "2025-12-01 15:22:00"
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 10
+ *                 keyword:
+ *                   type: string
+ *                   example: "공지"
+ *       400:
+ *         description: 잘못된 페이지 번호
+ *       404:
+ *         description: 해당 페이지에 검색 결과 없음
+ *       500:
+ *         description: 서버 오류
+ */
+router.get('/boardAll/:page/:keyword', async (req, res) => {
+    const page = parseInt(req.params.page) || 1;
+    const keyword = req.params.keyword || "";
+    if (page < 1) {
+        return res.status(400).json({ status: 400, message: '유효하지 않은 페이지 번호입니다.' });
+    }
+
+    try{
+        const data = await getBoardAll(page, keyword);
+
+        if(!data) {
+            return res.status(500).json({ status: 500, message: '게시글 조회 중 서버 내부 오류가 발생했습니다.' });
+        }
+        if (data.length === 0 && page > 1) {
+            return res.status(404).json({ status: 404, message: '요청하신 페이지에 게시글이 없습니다.' });
+        }
+        res.status(200).json({ status: 200, data: data, page: page, pageSize: 10 });
+    }catch(err){
+        console.error(err);
+        res.status(500).json({ status: 500, message: '서버 오류' });
+    }
+})
 
 module.exports = router;
