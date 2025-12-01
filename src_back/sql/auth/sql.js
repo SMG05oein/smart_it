@@ -39,9 +39,39 @@ async function login(req2) {
     return result[0].length !== 0; // 있다면 false 없으면 true
 }
 
+
+async function isMe(boardId) {
+    let con;
+
+    const sql = `
+        SELECT 
+            b.board_id,
+            m.user_id
+        FROM board b
+        JOIN members m ON b.fk_members_id = m.members_id
+        WHERE b.board_id = ?
+        LIMIT 1
+    `;
+
+    try {
+        con = await getConnection();
+        const [rows] = await con.query(sql, [boardId]);
+
+        if (rows.length === 0) return null;
+
+        return rows[0];   // { board_id, user_id }
+    } catch (err) {
+        console.error("isMe SQL Error:", err);
+        return null;
+    }
+}
+
+module.exports = { isMe };
+
 module.exports = {
     testSql,
     checkId,
     addMember,
-    login
+    login,
+    isMe
 };
