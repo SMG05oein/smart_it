@@ -95,9 +95,44 @@ async function updateBoard(boardId, userId, title, content) {
     }
 }
 
+/**
+ * 모든 게시글 조회
+ */
+async function getBoardAll(page){
+    let con;
+
+    // 페이지당 게시글 수 설정
+    const pageSize = 10;
+    // OFFSET 계산: (페이지 번호 - 1) * 페이지당 게시글 수
+    const offset = (page - 1) * pageSize;
+
+    try{
+        con = await getConnection();
+
+        // LIMIT와 OFFSET을 사용하여 페이지네이션 적용
+        // 최신 글부터 보여주기 위해 created_at 기준 내림차순 정렬
+        const sql = `
+            SELECT b.board_id, b.title, b.board_reg_date, b.board_update_date, m.user_id 
+            FROM board b
+            inner join members m on b.fk_members_id = m.members_id
+            ORDER BY b.board_id DESC 
+            LIMIT ? OFFSET ?
+        `;
+
+        const [data] = await con.query(sql, [pageSize, offset]);
+
+        return data;
+
+    } catch (error) {
+        console.error("모든 게시글 불러오기 오류:", error);
+        return false;
+    }
+}
+
 module.exports = {
     insertBoard,
     deleteBoard,
     getBoard,
-    updateBoard
+    updateBoard,
+    getBoardAll
 };
