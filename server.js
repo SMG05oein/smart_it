@@ -9,6 +9,7 @@ const { swaggerUi, specs } = require("./swagger/swagger")
 const auth = require('./src_back/auth/auth');
 const board = require('./src_back/board/board');
 const daily = require('./src_back/daily/daily');
+const chat = require('./src_back/chat/chat');
 const port = process.env.PORT || 8008; // 포트 설정
 
 // connectDB();
@@ -29,6 +30,7 @@ app.use("/api/swagger", swaggerUi.serve, swaggerUi.setup(specs))
 app.use("/api", auth);
 app.use("/api", board);
 app.use("/api", daily);
+app.use("/api", chat);
 
 
 // 4. 생성된 쿠키 확인 (request 객체의 cookies 속성으로 접근)
