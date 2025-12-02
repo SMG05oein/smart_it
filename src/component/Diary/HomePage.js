@@ -138,6 +138,7 @@ function Homepage() {
             <DailyList
                 currentMonth={currentMonth - 1}
                 monthTodos={monthTodos}
+                currentYear = {currentYear}
                 handleEditTodo={() => {}}
                 handleDeleteTodo={() => {}}
             />

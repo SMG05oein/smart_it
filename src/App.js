@@ -45,7 +45,7 @@ function App() {
 
 
                 {/* 나의 일지 리스트 */}
-                <Route path={"/diary/list"} element={<div className={'Section scroll-hidden'}><DiaryListPage /></div>}/>
+                <Route path={"/diary/list/:year?/:month?"} element={<div className={'Section scroll-hidden'}><DiaryListPage /></div>}/>
                 <Route path={"/diary/edit/:id"} element={<div className={'Section scroll-hidden'}><DiaryEditPage /></div>}/>
 
                 {/* 나의 일지 등록 */}

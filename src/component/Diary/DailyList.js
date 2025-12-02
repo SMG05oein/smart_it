@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 
-const DailyList = ({ currentMonth, monthTodos }) => {
+const DailyList = ({ currentMonth, monthTodos, currentYear }) => {
     const navigate = useNavigate();
 
     const topThree = [...monthTodos]
@@ -15,7 +15,7 @@ const DailyList = ({ currentMonth, monthTodos }) => {
                 <button
                     className={"btn btn-sm btn-outline-info"}
                     style={{ padding: "4px 8px", fontSize: "0.8rem", marginLeft: "8px" }}
-                    onClick={() => navigate("/diary/list")}
+                    onClick={() => navigate(`/diary/list/${currentYear}/${currentMonth + 1}`)}
                 >
                     나의 일지 리스트
                 </button>

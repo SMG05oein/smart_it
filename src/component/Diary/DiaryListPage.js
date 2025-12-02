@@ -3,16 +3,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, Table, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import "./daily.style.css"
 
 const DiaryListPage = () => {
     const navigate = useNavigate();
-
+    const {year: yy, month: mm} = useParams();
     // 현재 날짜
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
+    const currentYear = yy ? Number(yy) : now.getFullYear();
+    const currentMonth = mm ? Number(mm) : now.getMonth() + 1;
 
     // 선택된 연/월 상태값
     const [year, setYear] = useState(currentYear);
