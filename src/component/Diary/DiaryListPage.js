@@ -115,7 +115,6 @@ const DiaryListPage = () => {
                         borderRadius: "4px",
                         overflow: "hidden",
                         flexGrow: 1,
-                        minHeight: "280px",
                     }}>
                         <Table bordered hover size="sm" className="mb-0" style={{ textAlign: "center", fontSize: "0.85rem" }}>
                             <thead>
@@ -130,8 +129,8 @@ const DiaryListPage = () => {
                             {currentDiaries.map((d, idx) => (
                                 <tr key={d.calender_id} style={{ cursor: "pointer" }}>
                                     <td><span>{indexOfFirst + idx + 1}</span></td>
-                                    <td style={{ textAlign: "left" }} onClick={() => navigate(`/diary/edit/${d.calender_id}`)}><span>{d.title}</span></td>
-                                    <td style={{ textAlign: "left" }}>
+                                    <td onClick={() => navigate(`/diary/edit/${d.calender_id}`)}><span>{d.title}</span></td>
+                                    <td>
                                         <span>{d.content.length > 15 ? d.content.slice(0, 15) + "..." : d.content}</span>
                                     </td>
                                     <td><span>{d.use_date_local}</span></td>

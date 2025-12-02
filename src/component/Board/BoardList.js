@@ -160,7 +160,6 @@ const BoardList = () => {
             style={{
                 maxWidth: "900px",   // 전체 폭
                 margin: "0 auto",
-                paddingBottom: "70px", // FNB 만큼 여백
             }}
         >
             {/* 상단 제목 */}
@@ -199,11 +198,10 @@ const BoardList = () => {
             </Row>
 
             {/* 🔹 가운데 영역을 flex-grow로 키워서 화면을 꽉 채움 */}
-            <Row className="flex-grow-1 h-100">
-                <Col className="d-flex flex-column h-100">
+            <Row className="flex-grow-1">
+                <Col className="d-flex flex-column">
                     {/* 테이블 박스 (세로로 넓게) */}
-                    <div className="w-100"
-                        style={{
+                    <div style={{
                             border: "1px solid #007bff",
                             borderRadius: "4px",
                             overflow: "hidden",
@@ -247,10 +245,6 @@ const BoardList = () => {
                             </tbody>
                         </Table>
                     </div>
-                </Col>
-            </Row>
-            <Row className={"mt-2"}>
-                <Col>
                     {/* 하단 페이지네이션 */}
                     <div
                         className="mt-2 d-flex justify-content-center align-items-center"
