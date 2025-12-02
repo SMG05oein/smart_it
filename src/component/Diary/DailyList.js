@@ -40,7 +40,7 @@ const DailyList = ({ currentMonth, monthTodos, currentYear }) => {
                         >
                             {/* 날짜 + 제목만 심플하게 */}
                             <span style={{ flex: 1 }}>
-                                {console.log("Item: ",item)}
+                                {/*{console.log("Item: ",item)}*/}
                                 {`${item.use_date_local.substr(5,2)}월 ${item.use_date_local.substr(8,2)}일 - ${item.title}`}
                             </span>
                         </li>

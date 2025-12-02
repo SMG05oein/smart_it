@@ -1,7 +1,8 @@
 // src/component/Diary/DiaryEditPage.js
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
+import axios from "axios";
 
 const STORAGE_KEY = "diaryPosts";
 
@@ -22,6 +23,9 @@ const saveDiaries = (arr) => {
 const DiaryEditPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();          // URL의 :id
+    const location = useLocation();
+    const year = location.state?.year;
+    const month = location.state?.month;
     const numericId = Number(id);
 
     const [title, setTitle] = useState("");
@@ -29,37 +33,61 @@ const DiaryEditPage = () => {
     const [date, setDate] = useState("");
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const [isMe, setIsMe] = useState(false);
 
     // 처음 들어왔을 때 해당 일지 불러오기
     useEffect(() => {
-        const diaries = loadDiaries();
-        const target = diaries.find((d) => d.id === numericId);
 
-        if (!target) {
-            setNotFound(true);
-            setLoading(false);
-            return;
+        try{
+            axios.post(`${process.env.REACT_APP_API_URL}/api/isMeDaily`,{calender_id: numericId},{withCredentials: true})
+                .then(res => {
+                    // console.log(res.data);
+                    if(!(res.data.isMe)){
+                        alert("비정상적인 접근입니다.")
+                        navigate("/diary/list");
+                    }
+                })
+
+        }catch(e){
+            console.error(e);
         }
 
-        setTitle(target.title);
-        setContent(target.content);
-        setDate(target.date);   // "YYYY-MM-DD"
+        try {
+            axios.get(`${process.env.REACT_APP_API_URL}/api/detailDaily/${id}`,{withCredentials: true})
+                .then(r => {
+                    const rr = r.data.data;
+                    // console.log(r.data);
+                    // console.log(rr.use_date.substr(0, 10));
+                    setTitle(rr.title);
+                    setContent(rr.content);
+                    setDate(rr.use_date_local.substr(0, 10));   // "YYYY-MM-DD"
+                })
+        }catch (e) {
+            console.log(e)
+        }
+
         setLoading(false);
     }, [numericId]);
 
     const handleCancel = () => {
-        navigate(-1);
+        navigate(`/diary/list/${year}/${month}`);
     };
 
     const handleDelete = () => {
         if (!window.confirm("이 일지를 삭제하시겠습니까?")) return;
+        try{
+            axios.post(`${process.env.REACT_APP_API_URL}/api/delDaily`,{id: numericId},{withCredentials: true})
+                .then(res => {
+                    if(res.data.state == 200){
+                        navigate(`/diary/list/${year}/${month}`);
+                    }
+                })
 
-        const diaries = loadDiaries();
-        const updated = diaries.filter((d) => d.id !== numericId);
-        saveDiaries(updated);
-
+        }catch(e){
+            console.error(e);
+        }
         alert("일지가 삭제되었습니다.");
-        navigate("/diary/list");
+        navigate(`/diary/list/${year}/${month}`);
     };
 
     const handleResubmit = (e) => {
@@ -78,21 +106,32 @@ const DiaryEditPage = () => {
             return;
         }
 
-        const diaries = loadDiaries();
-        const updated = diaries.map((d) =>
-            d.id === numericId
-                ? {
-                    ...d,
-                    title: title.trim(),
-                    content: content.trim(),
-                    date,              // 날짜 변경 가능
-                }
-                : d
-        );
+        try{
+            axios.post(`${process.env.REACT_APP_API_URL}/api/updateDaily`,
+                {
+                    id: numericId,
+                    title: title,
+                    content: content,
+                    use_date: date
+                },
+                {withCredentials: true})
+                .then(res => {
+                    console.log(res.data)
+                    if(res.data.status == 200){
+                        alert("일지가 수정되었습니다!")
+                        // navigate(`/diary/list/${year}/${month}`);
+                    }else{
+                        alert('수정 권한이 없습니다.')
+                        navigate(`/diary/list/${year}/${month}`);
+                    }
+                })
 
-        saveDiaries(updated);
-        alert("일지가 수정되었습니다.");
-        navigate("/diary/list");
+        }catch(e){
+            console.error(e);
+        }
+
+        // alert("일지가 수정되었습니다.");
+        // navigate("/diary/list");
     };
 
     if (loading) {
@@ -111,7 +150,7 @@ const DiaryEditPage = () => {
                     variant="secondary"
                     size="sm"
                     className="mt-2"
-                    onClick={() => navigate("/diary/list")}
+                    onClick={() => navigate(`/diary/list/${year}/${month}`)}
                 >
                     목록으로
                 </Button>

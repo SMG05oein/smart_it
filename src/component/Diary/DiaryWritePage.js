@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const STORAGE_KEY = "diaryPosts";
 
@@ -48,20 +49,25 @@ const DiaryWritePage = () => {
             alert("날짜를 선택해주세요.");
             return;
         }
+        console.log(date);
 
-        const newDiary = {
-            id: Date.now(), // 임시 ID (백엔드 연동 시 서버에서 받은 ID로 교체)
-            title: title.trim(),
-            content: content.trim(),
-            date, // "YYYY-MM-DD"
-        };
+        axios.post(`${process.env.REACT_APP_API_URL}/api/createDaily`,
+            {
+                title: title.trim(),
+                content: content.trim(),
+                use_date: date
+            }, {withCredentials: true})
+            .then(res => {
+                if(res.data.status == 200) {
+                    alert("일지가 등록되었습니다.");
+                    navigate("/diary/list");
+                }else{
+                    alert("비정상적인 접근입니다.");
+                    navigate("/diary/list");
+                }
+            })
 
-        const diaries = loadDiaries();
-        const updated = [...diaries, newDiary];
-        saveDiaries(updated);
 
-        alert("일지가 등록되었습니다.");
-        navigate("/diary/list");
     };
 
     const handleCancel = () => {

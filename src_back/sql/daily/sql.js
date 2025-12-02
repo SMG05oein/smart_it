@@ -107,7 +107,10 @@ async function getDailyDetail(userId, dailyId) {
     if (!membersId) throw new Error("회원 정보가 존재하지 않습니다.");
 
     const sql = `
-        SELECT c.*, m.user_id
+        SELECT 
+            c.*,
+            DATE_FORMAT(c.use_date, '%Y-%m-%d') AS use_date_local,
+            m.user_id
         FROM calender c
         JOIN members m On c.fk_members_id=m.members_id
         WHERE c.calender_id = ?
