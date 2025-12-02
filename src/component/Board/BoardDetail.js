@@ -41,7 +41,7 @@ const BoardDetail = () => {
     const [data, setData] = useState([]);
     const [isMe, setIsMe] = useState(false);
     useEffect(() => {
-        axios.post(`${process.env.REACT_APP_API_URL}/api/isMe`,{boardId: postId},{withCredentials: true})
+        axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`,{boardId: postId},{withCredentials: true})
             .then((res) => {
                 let r = res.data;
                 setIsMe(r.isMe);

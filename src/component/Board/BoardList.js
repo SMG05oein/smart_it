@@ -233,10 +233,10 @@ const BoardList = () => {
                                     className="align-middle"
                                     // onClick={() => navigate(`/board/${d.board_id}`)}
                                 >
-                                    <td style={{verticalAlign: "middle"}}><span>{totalContent - (currentPage - 1) * 10 - idx}</span></td>
-                                    <td style={{verticalAlign: "middle"}} onClick={() => navigate(`/board/${d.board_id}`)}><span>{d.title}</span></td>
-                                    <td style={{verticalAlign: "middle"}}><span>{d.user_id}</span></td>
-                                    <td style={{verticalAlign: "middle"}}><span>{d.board_reg_date ? d.board_reg_date.substring(0, 10) : '날짜 없음'}</span></td>
+                                    <td><span>{totalContent - (currentPage - 1) * 10 - idx}</span></td>
+                                    <td onClick={() => navigate(`/board/${d.board_id}`)}><span>{d.title}</span></td>
+                                    <td><span>{d.user_id}</span></td>
+                                    <td><span>{d.board_reg_date ? d.board_reg_date.substring(0, 10) : '날짜 없음'}</span></td>
                                 </tr>
                             ))}
                             {data.length === 0 && (
@@ -256,12 +256,7 @@ const BoardList = () => {
                         className="mt-2 d-flex justify-content-center align-items-center"
                         style={{ fontSize: "0.8rem", gap: "4px" }}
                     >
-                        <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => goToPage(currentPage - 1)}
-                            disabled={currentPage === 1}
-                        >
+                        <Button variant="outline-secondary" size="sm" onClick={() => goToPage(currentPage - 1)}  disabled={currentPage === 1}>
                             &lt;
                         </Button>
 

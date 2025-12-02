@@ -11,7 +11,7 @@ const BoardEdit = () => {
     const initialPost = location.state || { title: "", content: "" };
 
     useEffect(() => {
-        axios.post(`${process.env.REACT_APP_API_URL}/api/isMe`, {boardId: id}, {withCredentials: true})
+        axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`, {boardId: id}, {withCredentials: true})
             .then((res) => {
                 let r = res.data;
 

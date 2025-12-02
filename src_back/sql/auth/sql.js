@@ -40,7 +40,7 @@ async function login(req2) {
 }
 
 
-async function isMe(boardId) {
+async function isMeBoard(boardId) {
     let con;
 
     const sql = `
@@ -66,12 +66,37 @@ async function isMe(boardId) {
     }
 }
 
-module.exports = { isMe };
+async function isMeDaily(calender_id) {
+    let con;
+
+    const sql = `
+        SELECT 
+            c.calender_id,
+            m.user_id
+        FROM calender c
+        JOIN members m ON c.fk_members_id = m.members_id
+        WHERE c.calender_id = ?
+        LIMIT 1
+    `;
+
+    try {
+        con = await getConnection();
+        const [rows] = await con.query(sql, [calender_id]);
+
+        if (rows.length === 0) return null;
+
+        return rows[0];   // { board_id, user_id }
+    } catch (err) {
+        console.error("isMe SQL Error:", err);
+        return null;
+    }
+}
+
 
 module.exports = {
     testSql,
     checkId,
     addMember,
     login,
-    isMe
+    isMeBoard, isMeDaily
 };

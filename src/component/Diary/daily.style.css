@@ -1,12 +1,14 @@
 tbody td{
     height: 56.7px !important;
-    vertical-align: middle;
+    vertical-align: middle !important;
     /*display: flex !important;*/
     /*flex-direction: column !important;*/
     /*justify-content: center!important;*/
     /*text-align: center!important;*/
     /*min-height: 10.65% !important;*/
     /*max-height: 10.65%!important;*/
+    /*style={{verticalAlign: "middle"}}*/
+    /*vertical-align: middle;*/
 }
 
 td span{
