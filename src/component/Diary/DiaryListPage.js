@@ -129,7 +129,7 @@ const DiaryListPage = () => {
                             {currentDiaries.map((d, idx) => (
                                 <tr key={d.calender_id} style={{ cursor: "pointer" }}>
                                     <td><span>{indexOfFirst + idx + 1}</span></td>
-                                    <td onClick={() => navigate(`/diary/edit/${d.calender_id}`)}><span>{d.title}</span></td>
+                                    <td onClick={() => navigate(`/diary/edit/${d.calender_id}`, {state: {year: year, month: month}})}><span>{d.title}</span></td>
                                     <td>
                                         <span>{d.content.length > 15 ? d.content.slice(0, 15) + "..." : d.content}</span>
                                     </td>

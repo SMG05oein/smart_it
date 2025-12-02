@@ -99,20 +99,12 @@ router.post("/createDaily", async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
- * /updateDaily/{id}:
+ * /updateDaily:
  *   post:
  *     tags: [일지]
  *     summary: "일지 수정"
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: 일지 ID
  *     requestBody:
  *       required: true
  *       content:
@@ -120,6 +112,9 @@ router.post("/createDaily", async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: 수정할 일지 ID
  *               title:
  *                 type: string
  *               content:
@@ -135,39 +130,44 @@ router.post("/createDaily", async (req, res) => {
  *       401:
  *         description: 인증 필요
  */
-router.post("/updateDaily/:id", async (req, res) => {
-
+router.post("/updateDaily", async (req, res) => {
     const userId = req.cookies.auth;
     if (!userId)
         return res.status(401).json({ status: 401, message: "로그인 필요" });
 
-    const { id } = req.params;
-    const { title, content, use_date } = req.body;
+    const { id, title, content, use_date } = req.body;
+
+    if (!id)
+        return res.status(400).json({ status: 400, message: "id는 필수입니다" });
 
     try {
         const r = await updateDaily(userId, id, title, content, use_date);
-        if(!r) res.status(403).json({ status: 403, message: "권한 없음" })
-        res.status(200).json({ status: 200, message: "수정 완료" });
+        if (!r) return res.status(403).json({ status: 403, message: "권한 없음" });
+
+        return res.status(200).json({ status: 200, message: "수정 완료" });
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: 500, message: "서버 오류" });
+        return res.status(500).json({ status: 500, message: "서버 오류" });
     }
 });
 
-
 /**
  * @swagger
- * /delDaily/{id}:
+ * /delDaily:
  *   post:
  *     tags: [일지]
  *     summary: "일지 삭제"
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: 일지 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: 삭제할 일지 ID
  *     responses:
  *       200:
  *         description: 삭제 성공
@@ -176,20 +176,26 @@ router.post("/updateDaily/:id", async (req, res) => {
  *       401:
  *         description: 인증 필요
  */
-router.post("/delDaily/:id", async (req, res) => {
+router.post("/delDaily", async (req, res) => {
+
     const userId = req.cookies.auth;
     if (!userId)
         return res.status(401).json({ status: 401, message: "로그인 필요" });
 
-    const { id } = req.params;
+    const { id } = req.body;
+
+    if (!id)
+        return res.status(400).json({ status: 400, message: "id는 필수입니다" });
 
     try {
         const r = await deleteDaily(userId, id);
-        if(!r) res.status(403).json({ status: 403, message: "권한 없음" })
-        res.status(200).json({ status: 200, message: "삭제 완료" });
+        if (!r) return res.status(403).json({ status: 403, message: "권한 없음" });
+
+        return res.status(200).json({ status: 200, message: "삭제 완료" });
+
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: 500, message: "서버 오류" });
+        return res.status(500).json({ status: 500, message: "서버 오류" });
     }
 });
 
