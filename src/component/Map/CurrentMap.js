@@ -9,25 +9,29 @@ import React, {
 const CurrentMap = forwardRef((props, ref) => {
     const mapDivRef = useRef(null);
 
-    // 지도/위치/마커 정보들
     const mapRef = useRef(null);
-    const myPosRef = useRef(null);          // 내 위치 LatLng
-    const myMarkerRef = useRef(null);       // 내 위치 마커
-    const hospitalMarkersRef = useRef([]);  // 동물병원 마커들
-    const markersVisibleRef = useRef(true); // 마커 표시 상태
-    const selectedPlaceRef = useRef(null);  // 마지막으로 클릭한 병원 정보
+    const myPosRef = useRef(null);
+    const myMarkerRef = useRef(null);
+    const hospitalMarkersRef = useRef([]);
+    const markersVisibleRef = useRef(true);
+    const selectedPlaceRef = useRef(null);
 
     // ---------------- 지도 초기화 ----------------
     useEffect(() => {
-        // 이미 kakao 로드됐으면 바로 초기화
+        // 이미 로드돼 있으면 바로 사용
         if (window.kakao && window.kakao.maps) {
             window.kakao.maps.load(initMap);
             return;
         }
 
+        const KAKAO_KEY = process.env.REACT_APP_KAKAO_KEY;
+        if (!KAKAO_KEY) {
+            console.error("REACT_APP_KAKAO_KEY 에러");
+            return;
+        }
+
         const script = document.createElement("script");
-        script.src =
-            "https://dapi.kakao.com/v2/maps/sdk.js?appkey=4efdb00e4415ec712f3c444730b6c634&autoload=false&libraries=services";
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
         script.async = true;
 
         script.onload = () => {
@@ -56,7 +60,6 @@ const CurrentMap = forwardRef((props, ref) => {
         });
         mapRef.current = map;
 
-        // 내 위치 찾기
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
@@ -86,26 +89,30 @@ const CurrentMap = forwardRef((props, ref) => {
 
     // ---------------- 버튼에서 쓸 함수들 ----------------
 
-    // 1) 동물병원 검색 + 마커 생성
-    const searchHospitals = () => {
+    // 🔹 1) 키워드로 장소 검색
+    const searchHospitals = (keyword = "동물병원") => {
         const { kakao } = window;
         const map = mapRef.current;
         if (!map) return;
 
-        // 이전 마커들 제거
+        if (!keyword || !keyword.trim()) {
+            alert("검색어를 입력해주세요.");
+            return;
+        }
+
+        // 이전 마커 제거
         hospitalMarkersRef.current.forEach((m) => m.setMap(null));
         hospitalMarkersRef.current = [];
         selectedPlaceRef.current = null;
 
         const ps = new kakao.maps.services.Places();
-
         const center = myPosRef.current || map.getCenter();
 
         ps.keywordSearch(
-            "동물병원",
+            keyword,
             (data, status) => {
                 if (status !== kakao.maps.services.Status.OK) {
-                    alert("근처 동물병원을 찾지 못했습니다.");
+                    alert("해당 키워드로 장소를 찾지 못했습니다.");
                     return;
                 }
 
@@ -119,7 +126,6 @@ const CurrentMap = forwardRef((props, ref) => {
                         map,
                     });
 
-                    // 마커 클릭 시 선택된 병원 저장
                     kakao.maps.event.addListener(marker, "click", () => {
                         selectedPlaceRef.current = place;
                         alert(`[선택됨] ${place.place_name}`);
@@ -134,12 +140,11 @@ const CurrentMap = forwardRef((props, ref) => {
             },
             {
                 location: center,
-                radius: 5000, // 5km
+                radius: 5000,
             }
         );
     };
 
-    // 2) 마커 표시/숨기기
     const toggleMarkers = () => {
         const map = mapRef.current;
         if (!map) return;
@@ -149,7 +154,6 @@ const CurrentMap = forwardRef((props, ref) => {
         markersVisibleRef.current = !visible;
     };
 
-    // 3) 내 위치로 돌아가기
     const goMyLocation = () => {
         const map = mapRef.current;
         if (!map) return;
@@ -162,21 +166,21 @@ const CurrentMap = forwardRef((props, ref) => {
         map.panTo(pos);
     };
 
-    // 4) 길 찾기 (선택된 병원 기준으로 카카오맵 새창 열기)
     const openRoute = () => {
         const place = selectedPlaceRef.current;
         if (!place) {
-            alert("길 안내를 받을 동물병원을 먼저 클릭하세요.");
+            alert("길 안내를 받을 장소 마커를 먼저 클릭하세요.");
             return;
         }
 
+        // 새 창/탭으로 카카오 길찾기 열기
         const url = `https://map.kakao.com/link/to/${encodeURIComponent(
             place.place_name
         )},${place.y},${place.x}`;
         window.open(url, "_blank");
     };
 
-    // 부모(HospitalSearch)에서 사용할 수 있게 노출
+    // 부모에서 쓸 수 있게 내보내기
     useImperativeHandle(ref, () => ({
         searchHospitals,
         toggleMarkers,
