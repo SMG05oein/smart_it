@@ -88,16 +88,23 @@ const ChatBot = () => {
                 `}
             </style>
 
-            {/* 상단 헤더 */}
+            {/* 상단 헤더 (게시판과 동일한 스타일 적용) */}
             <div style={{ 
                 padding: "10px", 
-                borderBottom: "1px solid #eee", 
-                backgroundColor: "#f8f9fa",
+                borderBottom: "1px solid #f1f3f5", // 연한 테두리
+                backgroundColor: "#fff",           // 흰색 배경
                 textAlign: "center",
-                fontWeight: "bold",
-                flexShrink: 0
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                height: "60px",                    // 높이 통일
+                zIndex: 10,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
             }}>
-                🐶 강아지 AI 상담소
+                <span style={{ fontSize: "1.1rem", fontWeight: "800", color: "#343a40", letterSpacing: "-0.5px" }}>
+                    🐶 강아지 AI 상담소
+                </span>
             </div>
 
             {/* 1. 대화 내용 표시 영역 */}
@@ -108,8 +115,8 @@ const ChatBot = () => {
                     padding: "20px",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "15px",
-                    backgroundColor: "#fff",
+                    gap: "20px",
+                    backgroundColor: "#fff", // 본문 배경 흰색
                     minHeight: 0 
                 }}
             >
@@ -118,14 +125,14 @@ const ChatBot = () => {
                         textAlign: "center", 
                         marginTop: "auto", 
                         marginBottom: "auto",
-                        color: "#aaa",
+                        color: "#adb5bd",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center"
                     }}>
                         <div style={{ fontSize: "3rem", marginBottom: "10px" }}>🐕</div>
-                        <h5>궁금한 점을 물어보세요!</h5>
-                        <p style={{ fontSize: "0.9rem" }}>
+                        <h5 style={{ fontWeight: "bold", color: "#495057" }}>무엇을 도와드릴까요?</h5>
+                        <p style={{ fontSize: "0.9rem", marginTop: "5px" }}>
                             질문할 때마다 새로운 상담이 시작됩니다.<br/>
                             (이전 대화는 사라집니다)
                         </p>
@@ -144,33 +151,36 @@ const ChatBot = () => {
                     >
                         <div style={{ 
                             fontSize: "0.8rem", 
-                            marginBottom: "5px", 
-                            color: "#666",
-                            padding: "0 5px"
+                            marginBottom: "6px", 
+                            color: "#868e96",
+                            padding: "0 4px",
+                            fontWeight: "600"
                         }}>
                             {msg.role === "user" ? "나" : "AI 수의사"}
                         </div>
 
                         <div style={{ 
                             maxWidth: "85%",
-                            padding: "12px 16px",
+                            padding: "14px 18px",
                             borderRadius: "18px",
                             fontSize: "1rem",
-                            lineHeight: "1.5",
+                            lineHeight: "1.6",
                             position: "relative",
                             wordBreak: "break-word",
-                            backgroundColor: msg.role === "user" ? "#007bff" : "#f1f3f5",
-                            color: msg.role === "user" ? "#fff" : "#333",
+                            // 색상 통일: 유저는 브랜드 컬러, 봇은 연한 회색 배경
+                            backgroundColor: msg.role === "user" ? "#4dabf7" : "#f8f9fa",
+                            color: msg.role === "user" ? "#fff" : "#343a40",
                             borderBottomRightRadius: msg.role === "user" ? "4px" : "18px",
                             borderBottomLeftRadius: msg.role === "bot" ? "4px" : "18px",
-                            boxShadow: "0 1px 2px rgba(0,0,0,0.1)"
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+                            border: msg.role === "bot" ? "1px solid #f1f3f5" : "none"
                         }}>
                             {msg.text}
                         </div>
                     </div>
                 ))}
                 
-                {/* [수정] 로딩 인디케이터 */}
+                {/* 로딩 인디케이터 */}
                 {loading && (
                     <div 
                         className="msg-bubble"
@@ -180,31 +190,32 @@ const ChatBot = () => {
                             display: "flex",
                             alignItems: "center",
                             padding: "12px 16px",
-                            backgroundColor: "#f8f9fa",
+                            backgroundColor: "#fff",
                             borderRadius: "18px",
                             borderBottomLeftRadius: "4px",
-                            border: "1px solid #eee",
-                            color: "#555",
-                            fontSize: "0.9rem"
+                            border: "1px solid #f1f3f5",
+                            color: "#868e96",
+                            fontSize: "0.9rem",
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
                          }}>
                             <Spinner 
                                 animation="border" 
                                 size="sm" 
                                 variant="primary" 
-                                style={{ marginRight: "10px", width: "1rem", height: "1rem" }} 
+                                style={{ marginRight: "10px", width: "1rem", height: "1rem", borderWidth: "2px" }} 
                             />
-                            <span>AI 수의사가 생각중입니다..</span>
+                            <span>답변을 생성하고 있습니다...</span>
                          </div>
                     </div>
                 )}
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* 2. 입력 영역 */}
+            {/* 2. 입력 영역 (게시판 하단과 통일감) */}
             <div 
                 style={{ 
                     padding: "15px", 
-                    borderTop: "1px solid #eee", 
+                    borderTop: "1px solid #f1f3f5", 
                     backgroundColor: "#fff",
                     display: "flex",
                     gap: "10px",
@@ -217,26 +228,32 @@ const ChatBot = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="새로운 질문 입력..."
+                    placeholder="증상을 입력해주세요..."
                     disabled={loading}
                     style={{
                         flex: 1,
-                        padding: "12px",
-                        border: "1px solid #ddd",
+                        padding: "12px 16px",
+                        border: "none", // 테두리 없애고 배경색 활용
                         borderRadius: "20px",
                         outline: "none",
                         fontSize: "1rem",
-                        paddingLeft: "15px"
+                        backgroundColor: "#f8f9fa", // 게시판 검색창과 동일한 연한 회색
+                        color: "#333",
+                        transition: "background-color 0.2s"
                     }}
+                    onFocus={(e) => e.target.style.backgroundColor = "#f1f3f5"}
+                    onBlur={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                 />
                 <Button 
                     onClick={handleSendMessage} 
                     disabled={loading || !input.trim()}
-                    variant="primary"
                     style={{ 
                         borderRadius: "20px", 
                         padding: "0 20px", 
-                        fontWeight: "bold" 
+                        fontWeight: "700",
+                        backgroundColor: "#4dabf7", // 브랜드 컬러
+                        border: "none",
+                        boxShadow: "0 4px 6px rgba(77, 171, 247, 0.2)"
                     }}
                 >
                     전송

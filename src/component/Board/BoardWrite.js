@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Col, Form, Button } from "react-bootstrap";
+import { Container, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -63,79 +63,156 @@ const BoardWrite = () => {
     };
 
     const handleCancel = () => {
-        navigate(-1);
+        if (window.confirm("글 작성을 취소하시겠습니까?")) {
+            navigate(-1);
+        }
     };
 
     return (
-        <div className="Section">
-            <Container
-                fluid
-                className="h-100 d-flex justify-content-center align-items-center"
-                style={{ paddingTop: "24px", paddingBottom: "70px" }}
+        <Container
+            fluid
+            style={{
+                height: "100%",
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                overflow: "hidden"
+            }}
+        >
+            {/* 1. 상단 헤더 (디자인 통일) */}
+            <div
+                style={{
+                    padding: "12px 15px",
+                    borderBottom: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    height: "60px",
+                    zIndex: 10,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                }}
             >
-                <Col
-                    xs={12}
-                    md={8}
-                    lg={6}
-                    style={{
-                        border: "1px solid #777",
-                        borderRadius: "4px",
-                        padding: "16px 16px 12px",
-                        backgroundColor: "#fff",
-                    }}
-                >
-                    <h5 style={{ marginBottom: "16px", fontWeight: "bold" }}>
-                        게시글 등록
-                    </h5>
+                <span style={{ fontSize: "1.1rem", fontWeight: "800", color: "#343a40", letterSpacing: "-0.5px" }}>
+                    게시글 등록
+                </span>
+            </div>
 
+            {/* 2. 중간 콘텐츠 영역 (스크롤 가능) */}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#f8f9fa", // 배경색 연한 회색
+                    minHeight: 0
+                }}
+            >
+                <div style={{ 
+                    backgroundColor: "#fff", 
+                    borderRadius: "16px", 
+                    padding: "20px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    border: "1px solid #f1f3f5"
+                }}>
                     <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ fontWeight: "bold" }}>제목</Form.Label>
+                        <Form.Group className="mb-4">
+                            <Form.Label style={{ fontWeight: "700", color: "#495057", marginBottom: "8px", fontSize: "0.95rem" }}>
+                                제목
+                            </Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="제목을 입력해주세요"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                size="sm"
+                                style={{
+                                    borderRadius: "12px",
+                                    backgroundColor: "#f8f9fa", // 입력창 배경 회색
+                                    border: "none",
+                                    padding: "12px",
+                                    fontSize: "1rem",
+                                    color: "#333"
+                                }}
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ fontWeight: "bold" }}>내용</Form.Label>
+                        <Form.Group className="mb-2">
+                            <Form.Label style={{ fontWeight: "700", color: "#495057", marginBottom: "8px", fontSize: "0.95rem" }}>
+                                내용
+                            </Form.Label>
                             <Form.Control
                                 as="textarea"
-                                rows={8}
+                                rows={10}
                                 placeholder="내용을 입력해주세요"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                size="sm"
-                                style={{ resize: "none" }}
+                                style={{
+                                    borderRadius: "12px",
+                                    backgroundColor: "#f8f9fa",
+                                    border: "none",
+                                    padding: "12px",
+                                    fontSize: "1rem",
+                                    resize: "none",
+                                    color: "#333",
+                                    lineHeight: "1.6"
+                                }}
                             />
                         </Form.Group>
-
-                        <div className="d-flex justify-content-end" style={{ gap: "6px" }}>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                type="button"
-                                onClick={handleCancel}
-                            >
-                                취소
-                            </Button>
-                            {/* 🔹 여기서 바로 handleSubmit 호출 */}
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                type="button"
-                                onClick={handleSubmit}
-                            >
-                                등록
-                            </Button>
-                        </div>
                     </Form>
-                </Col>
-            </Container>
-        </div>
+                </div>
+            </div>
+
+            {/* 3. 하단 액션바 (고정 영역) */}
+            <div
+                style={{
+                    padding: "15px",
+                    borderTop: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    display: "flex",
+                    justifyContent: "space-between", // 양쪽 정렬
+                    alignItems: "center",
+                    flexShrink: 0,
+                    paddingBottom: "max(15px, env(safe-area-inset-bottom))"
+                }}
+            >
+                <Button
+                    variant="light"
+                    onClick={handleCancel}
+                    style={{
+                        borderRadius: "12px",
+                        padding: "10px 24px",
+                        fontWeight: "600",
+                        color: "#495057",
+                        backgroundColor: "#f8f9fa",
+                        border: "none",
+                        fontSize: "0.95rem"
+                    }}
+                >
+                    취소
+                </Button>
+
+                <Button
+                    variant="primary"
+                    onClick={handleSubmit}
+                    style={{
+                        borderRadius: "12px",
+                        padding: "10px 24px",
+                        fontWeight: "700",
+                        fontSize: "0.95rem",
+                        backgroundColor: "#4dabf7", // 브랜드 컬러
+                        border: "none",
+                        boxShadow: "0 4px 6px rgba(77, 171, 247, 0.2)"
+                    }}
+                >
+                    등록
+                </Button>
+            </div>
+        </Container>
     );
 };
 

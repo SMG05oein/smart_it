@@ -1,266 +1,289 @@
-// src/component/Board/BoardDetail.js
-import React, {useEffect, useState} from "react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Button, Spinner } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import BoardWrite from "./BoardWrite";
-import axios from "axios";          // ✅ 추가
+import axios from "axios";
 
+// 더미 데이터 (테스트용)
 const dummyPosts = [
     {
         id: 32,
         title: "강아지가 아파요",
         author: "user_id",
         date: "2025-10-10",
-        content: "우리 강아지가 오늘부터 밥을 잘 안 먹어요...",
+        content: "우리 강아지가 오늘부터 밥을 잘 안 먹어요...\n계속 잠만 자는데 병원에 가봐야 할까요? ㅠㅠ",
     },
     {
         id: 31,
         title: "강아지 귀여워ㅠㅠ",
         author: "user_id",
         date: "2025-10-10",
-        content: "사진은 나중에 올릴게요 :)",
+        content: "사진은 나중에 올릴게요 :)\n진짜 너무 귀엽지 않나요?",
     },
-    // 필요하면 더 추가
 ];
 
 const BoardDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const postId = Number(id);
-    const post = dummyPosts.find((p) => p.id === postId);
 
-    const [comments, setComments] = useState([
-        {
-            id: 1,
-            author: "user_a",
-            content: "빨리 나았으면 좋겠어요 ㅠ",
-            date: "2025-10-11",
-        },
-    ]);
-    const [commentText, setCommentText] = useState("");
-    const [data, setData] = useState([]);
-    const [isMe, setIsMe] = useState(false);
+    // 상태 관리
+    const [data, setData] = useState(null);
+    const [isMe, setIsMe] = useState(false); // 작성자 본인 여부
+    const [loading, setLoading] = useState(true);
+
+    // 초기 데이터 로드
     useEffect(() => {
-        axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`,{boardId: postId},{withCredentials: true})
-            .then((res) => {
-                let r = res.data;
-                setIsMe(r.isMe);
-            })
+        const fetchData = async () => {
+            try {
+                // 1. 본인 확인 (API 연결 시 활성화)
+                /*
+                const meRes = await axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`, 
+                    { boardId: postId }, 
+                    { withCredentials: true }
+                );
+                setIsMe(meRes.data.isMe);
+                */
+                // 테스트용: id가 32번이면 내 글이라고 가정
+                if (postId === 32) setIsMe(true);
 
-        axios.get(`${process.env.REACT_APP_API_URL}/api/board/${postId}`)
-            .then(res => {
-                let r = res.data;
-                console.log("details data: ",r);
-                setData(r.data);
-            }).catch(error => {
-                console.log(error);
-        })
-    },[])
+                // 2. 게시글 상세 조회 (API 연결 시 활성화)
+                /*
+                const detailRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/board/${postId}`);
+                setData(detailRes.data.data);
+                */
 
+                // 테스트용: 더미 데이터에서 찾기
+                const dummy = dummyPosts.find(p => p.id === postId);
+                if (dummy) {
+                    // API 응답 구조에 맞게 매핑
+                    setData({
+                        board_id: dummy.id,
+                        title: dummy.title,
+                        user_id: dummy.author,
+                        board_reg_date: dummy.date,
+                        board_update_date: dummy.date,
+                        contents: dummy.content
+                    });
+                } else {
+                    setData(null);
+                }
 
-    // 0번이면 글쓰기 화면
+            } catch (error) {
+                console.error("데이터 로딩 실패:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [postId]);
+
+    // ✅ 게시글 삭제 핸들러
+    const handleDeletePost = async () => {
+        if (!window.confirm("정말 이 글을 삭제하시겠습니까?")) return;
+
+        try {
+            console.log("▶ 삭제 요청:", postId);
+            // API 호출 (주석 해제 후 사용)
+            /*
+            await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/deleteBoard`,
+                { boardId: postId },
+                { withCredentials: true }
+            );
+            */
+            alert("게시글이 삭제되었습니다.");
+            navigate("/board");
+        } catch (err) {
+            console.error("삭제 실패:", err);
+            alert("삭제에 실패했습니다.");
+        }
+    };
+
+    // 0번이면 글쓰기 화면 렌더링
     if (id == 0) {
         return <BoardWrite />;
     }
 
-    // id는 있는데 해당 글이 없는 경우
+    // 로딩 중일 때
+    if (loading) {
+        return (
+            <Container fluid className="h-100 d-flex justify-content-center align-items-center">
+                <Spinner animation="border" variant="primary" />
+            </Container>
+        );
+    }
+
+    // 데이터가 없을 때
     if (!data) {
         return (
-            <Container className="py-3" style={{ paddingBottom: "80px" }}>
-                <div>존재하지 않는 게시글입니다.</div>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    className="mt-2"
+            <Container fluid className="h-100 d-flex flex-column justify-content-center align-items-center">
+                <div style={{ fontSize: "1.2rem", color: "#adb5bd", marginBottom: "20px" }}>
+                    존재하지 않는 게시글입니다.
+                </div>
+                <Button 
                     onClick={() => navigate("/board")}
+                    style={{ borderRadius: "20px", padding: "8px 20px" }}
+                    variant="outline-secondary"
                 >
                     목록으로
                 </Button>
             </Container>
         );
-    } else {
-        // ✅ 댓글 추가
-        const handleAddComment = () => {
-            if (!commentText.trim()) return;
-            const newComment = {
-                id: comments.length + 1,
-                author: "현재유저", // 나중에 로그인 연동
-                content: commentText.trim(),
-                date: new Date().toISOString().slice(0, 10),
-            };
-            setComments([...comments, newComment]);
-            setCommentText("");
-        };
+    }
 
-        // ✅ 게시글 삭제
-        const handleDeletePost = async () => {
-            if (!window.confirm("정말 이 글을 삭제하시겠습니까?")) return;
-
-            try {
-                console.log("▶ /deleteBoard 요청 보내는 중...", { id: postId });
-
-                const res = await axios.post(
-                    `${process.env.REACT_APP_API_URL}/api/deleteBoard`,
-                    {
-                        // ⚠️ Swagger 스키마에 맞게 key 이름 확인!
-                        // 예: { id: postId } 또는 { boardId: postId }
-                        boardId: postId,
-                    },
-                    { withCredentials: true }
-                );
-
-                console.log("▶ /deleteBoard 응답:", res);
-
-                if (
-                    res.status === 200 || res.data?.code === 200
-                ) {
-                    alert("게시글이 삭제되었습니다.");
-                    navigate("/board");
-                } else {
-                    alert("게시글 삭제에 실패했습니다.");
-                }
-            } catch (err) {
-                console.error("▶ /deleteBoard 에러:", err);
-                const status = err.response?.status;
-
-                if (status === 400) {
-                    alert("요청이 잘못되었거나 권한이 없습니다.");
-                } else if (status === 404) {
-                    alert("서버에서 해당 게시글을 찾을 수 없습니다.");
-                } else {
-                    alert("서버 오류가 발생했습니다.");
-                }
-            }
-        };
-
-        return (
-            <Container
-                fluid
-                className="h-100 d-flex justify-content-center align-content-center flex-column py-3"
+    return (
+        <Container
+            fluid
+            style={{
+                height: "100%",
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                overflow: "hidden"
+            }}
+        >
+            {/* 1. 상단 헤더 (게시판/챗봇과 통일) */}
+            <div
+                style={{
+                    padding: "12px 15px",
+                    borderBottom: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    height: "60px",
+                    zIndex: 10,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                }}
             >
-                {/* 상단 제목 + 뒤로가기 */}
-                <Row className="mb-3">
-                    <Col>
-                        <h5 style={{ fontWeight: "bold" }}>제목: {data.title}</h5>
-                        <div style={{ fontSize: "0.85rem", color: "#666" }}>
-                            작성자: {data.user_id} <br/> 작성일: {data.board_reg_date?.substring(0, 10)} · 수정일: {data.board_update_date?.substring(0, 10)}
-                        </div>
-                    </Col>
-                </Row>
+                <span style={{ fontSize: "1.1rem", fontWeight: "800", color: "#343a40", letterSpacing: "-0.5px" }}>
+                    커뮤니티
+                </span>
+            </div>
 
-                {/* 본문 내용 */}
-                <Row className="mb-4">
-                    <Col>
-                        <div
+            {/* 2. 중간 콘텐츠 영역 (스크롤 가능) */}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#f8f9fa", // 배경색 연한 회색 (카드 부각)
+                    minHeight: 0
+                }}
+            >
+                {/* 게시글 내용 카드 */}
+                <div style={{ 
+                    backgroundColor: "#fff", 
+                    borderRadius: "16px", 
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    border: "1px solid #f1f3f5",
+                    padding: "25px",
+                    marginBottom: "20px"
+                }}>
+                    {/* 제목 영역 */}
+                    <div style={{ borderBottom: "1px solid #f1f3f5", paddingBottom: "15px", marginBottom: "20px" }}>
+                        <h4 style={{ fontWeight: "bold", color: "#343a40", marginBottom: "12px", lineHeight: "1.4" }}>
+                            {data.title}
+                        </h4>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem", color: "#868e96" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <span style={{ fontWeight: "600", color: "#495057" }}>{data.user_id}</span>
+                            </div>
+                            <span>{data.board_reg_date?.substring(0, 10)}</span>
+                        </div>
+                    </div>
+
+                    {/* 본문 영역 */}
+                    <div style={{ 
+                        fontSize: "1rem", 
+                        lineHeight: "1.8", 
+                        color: "#495057", 
+                        whiteSpace: "pre-wrap", // 줄바꿈 적용
+                        minHeight: "150px"
+                    }}>
+                        {data.contents}
+                    </div>
+                </div>
+
+                {/* (추후 댓글 기능이 필요하면 여기에 추가) */}
+            </div>
+
+            {/* 3. 하단 액션바 (고정 영역) */}
+            <div
+                style={{
+                    padding: "15px",
+                    borderTop: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    display: "flex",
+                    justifyContent: "space-between", // 양쪽 정렬
+                    alignItems: "center",
+                    flexShrink: 0,
+                    paddingBottom: "max(15px, env(safe-area-inset-bottom))"
+                }}
+            >
+                {/* 왼쪽: 목록 버튼 */}
+                <Button
+                    variant="light"
+                    onClick={() => navigate("/board")}
+                    style={{
+                        borderRadius: "12px",
+                        padding: "8px 20px",
+                        fontWeight: "600",
+                        color: "#495057",
+                        backgroundColor: "#f8f9fa",
+                        border: "none"
+                    }}
+                >
+                    목록
+                </Button>
+
+                {/* 오른쪽: 수정/삭제 (본인일 때만 표시) */}
+                {isMe && (
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        <Button
+                            variant="danger"
+                            onClick={handleDeletePost}
                             style={{
-                                border: "1px solid #ddd",
-                                borderRadius: "4px",
-                                minHeight: "150px",
-                                padding: "12px",
+                                borderRadius: "12px",
+                                padding: "8px 16px",
+                                fontWeight: "600",
                                 fontSize: "0.9rem",
-                                whiteSpace: "pre-wrap",
+                                backgroundColor: "#fff0f3", // 연한 빨강 배경
+                                color: "#e03131",
+                                border: "none"
                             }}
                         >
-                            {data.contents || "여기에 게시글 내용이 들어갑니다."}
-                        </div>
-                    </Col>
-                </Row>
-                <Row className="mb-4 ">
-                    <Col style={{display: "flex", gap: "1rem", justifyContent: "right"}}>
-                        <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            className="ms-2"
-                            onClick={() => navigate("/board")}
-                        >
-                            &lt; 목록
+                            삭제
                         </Button>
-                        {/* 🔥 글 삭제 버튼 */}
-                        {isMe && (
-                            <>
-                                <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    onClick={handleDeletePost}
-                                >
-                                    글 삭제
-                                </Button>
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    className="ms-2"
-                                    onClick={() =>
-                                        navigate(`/board/edit/${postId}`, {
-                                            state: { title: data.title, content: data.contents },
-                                        })
-                                    }
-                                >
-                                    수정
-                                </Button>
-                            </>
-                        )}
-                    </Col>
-                </Row>
-
-                {/*/!* 댓글 리스트 *!/*/}
-                {/*<Row className="mb-3">*/}
-                {/*    <Col>*/}
-                {/*        <h6 style={{ fontWeight: "bold", fontSize: "0.95rem" }}>댓글</h6>*/}
-                {/*        <div*/}
-                {/*            style={{*/}
-                {/*                border: "1px solid #eee",*/}
-                {/*                borderRadius: "4px",*/}
-                {/*                padding: "8px",*/}
-                {/*                maxHeight: "200px",*/}
-                {/*                overflowY: "auto",*/}
-                {/*                fontSize: "0.85rem",*/}
-                {/*            }}*/}
-                {/*        >*/}
-                {/*            {comments.length === 0 && (*/}
-                {/*                <div style={{ color: "#999" }}>아직 댓글이 없습니다.</div>*/}
-                {/*            )}*/}
-                {/*            {comments.map((c) => (*/}
-                {/*                <div*/}
-                {/*                    key={c.id}*/}
-                {/*                    style={{*/}
-                {/*                        borderBottom: "1px solid #f1f1f1",*/}
-                {/*                        padding: "4px 0",*/}
-                {/*                    }}*/}
-                {/*                >*/}
-                {/*                    <div style={{ fontWeight: "bold" }}>{c.author}</div>*/}
-                {/*                    <div>{c.content}</div>*/}
-                {/*                    <div*/}
-                {/*                        style={{ fontSize: "0.75rem", color: "#999" }}*/}
-                {/*                    >*/}
-                {/*                        {c.date}*/}
-                {/*                    </div>*/}
-                {/*                </div>*/}
-                {/*            ))}*/}
-                {/*        </div>*/}
-                {/*    </Col>*/}
-                {/*</Row>*/}
-
-                {/*/!* 댓글 입력 *!/*/}
-                {/*<Row>*/}
-                {/*    <Col>*/}
-                {/*        <Form.Control*/}
-                {/*            as="textarea"*/}
-                {/*            rows={2}*/}
-                {/*            placeholder="댓글을 입력하세요"*/}
-                {/*            value={commentText}*/}
-                {/*            onChange={(e) => setCommentText(e.target.value)}*/}
-                {/*            style={{ fontSize: "0.85rem" }}*/}
-                {/*        />*/}
-                {/*        <div className="d-flex justify-content-between mt-2">*/}
-                {/*            <Button size="sm" onClick={handleAddComment}>*/}
-                {/*                댓글 등록*/}
-                {/*            </Button>*/}
-                {/*        </div>*/}
-                {/*    </Col>*/}
-                {/*</Row>*/}
-            </Container>
-        );
-    }
+                        <Button
+                            variant="primary"
+                            onClick={() => navigate(`/board/edit/${postId}`, {
+                                state: { title: data.title, content: data.contents }
+                            })}
+                            style={{
+                                borderRadius: "12px",
+                                padding: "8px 16px",
+                                fontWeight: "600",
+                                fontSize: "0.9rem",
+                                backgroundColor: "#4dabf7",
+                                border: "none",
+                                boxShadow: "0 4px 6px rgba(77, 171, 247, 0.2)"
+                            }}
+                        >
+                            수정
+                        </Button>
+                    </div>
+                )}
+            </div>
+        </Container>
+    );
 };
 
 export default BoardDetail;

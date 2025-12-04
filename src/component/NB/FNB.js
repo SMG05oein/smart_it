@@ -1,67 +1,95 @@
 import React from 'react';
-import { CiChat2, CiHome, CiMap, CiViewBoard } from "react-icons/ci";
-import { Col, Container, Row } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Container, Row, Col } from "react-bootstrap";
+// Using Ionicons 5 for a modern mobile app look
+import { 
+    IoHomeOutline, IoHome,
+    IoMapOutline, IoMap,
+    IoChatbubblesOutline, IoChatbubbles,
+    IoGridOutline, IoGrid
+} from "react-icons/io5";
 
 const Fnb = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Helper to determine active state
+    const isActive = (path) => location.pathname === path;
+
+    // Brand color
+    const activeColor = "#4dabf7";
+    const inactiveColor = "#adb5bd";
+
+    // Nav Item Component to reduce repetition
+    const NavItem = ({ path, icon: Icon, activeIcon: ActiveIcon, label }) => {
+        const active = isActive(path);
+        return (
+            <Col
+                xs={3}
+                className="d-flex flex-column justify-content-center align-items-center"
+                onClick={() => navigate(path)}
+                style={{ cursor: 'pointer', height: '100%' }}
+            >
+                <div style={{ 
+                    fontSize: '1.5rem', 
+                    color: active ? activeColor : inactiveColor,
+                    marginBottom: '2px',
+                    transition: 'all 0.2s'
+                }}>
+                    {active ? <ActiveIcon /> : <Icon />}
+                </div>
+                <span style={{ 
+                    fontSize: '0.75rem', 
+                    fontWeight: active ? '600' : '400',
+                    color: active ? activeColor : inactiveColor 
+                }}>
+                    {label}
+                </span>
+            </Col>
+        );
+    };
 
     return (
-        <div className="FNB fixed-bottom bg-white border-top py-2" style={{ height: '70px' }}>
-            <Container fluid className="h-100 d-flex justify-content-center align-items-center">
-                <Row className="w-100 h-100 m-0">
+        <div 
+            className="fixed-bottom bg-white" 
+            style={{ 
+                height: '70px', 
+                borderTopLeftRadius: '20px', 
+                borderTopRightRadius: '20px',
+                boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+                zIndex: 1000,
+                paddingBottom: 'env(safe-area-inset-bottom)' // iPhone X+ safe area
+            }}
+        >
+            <Container fluid className="h-100">
+                <Row className="h-100">
+                    <NavItem 
+                        path="/hospital" 
+                        icon={IoMapOutline} 
+                        activeIcon={IoMap} 
+                        label="병원찾기" 
+                    />
+                    
+                    <NavItem 
+                        path="/chat" 
+                        icon={IoChatbubblesOutline} 
+                        activeIcon={IoChatbubbles} 
+                        label="AI상담" 
+                    />
 
-                    {/* 동물병원 조회 */}
-                    <Col
-                        xs={3}
-                        className="d-flex flex-column justify-content-center align-items-center text-center"
-                        onClick={() => navigate('/hospital')}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <i className="bi bi-search" style={{ fontSize: '1.2rem' }}>
-                            <CiMap />
-                        </i>
-                        {/*<small>병원 조회</small>*/}
-                    </Col>
+                    <NavItem 
+                        path="/" 
+                        icon={IoHomeOutline} 
+                        activeIcon={IoHome} 
+                        label="홈" 
+                    />
 
-                    {/* 챗봇 */}
-                    <Col
-                        xs={3}
-                        className="d-flex flex-column justify-content-center align-items-center text-center"
-                        onClick={() => navigate('/chat')}          // ✅ 추가
-                        style={{ cursor: 'pointer' }}               // ✅ 추가
-                    >
-                        <i className="bi bi-chat-dots" style={{ fontSize: '1.2rem' }}>
-                            <CiChat2 />
-                        </i>
-                        {/*<small>챗봇</small>*/}
-                    </Col>
-
-                    {/* 홈 */}
-                    <Col
-                        xs={3}
-                        className="d-flex flex-column justify-content-center align-items-center text-center"
-                        onClick={() => navigate('/')}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <i className="bi bi-house-door" style={{ fontSize: '1.2rem' }}>
-                            <CiHome />
-                        </i>
-                        {/*<small>홈</small>*/}
-                    </Col>
-
-                    {/* 게시판 */}
-                    <Col
-                        xs={3}
-                        className="d-flex flex-column justify-content-center align-items-center text-center"
-                        onClick={() => navigate('/board')}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        <i className="bi bi-clipboard-check" style={{ fontSize: '1.2rem' }}>
-                            <CiViewBoard />
-                        </i>
-                        {/*<small>게시판</small>*/}
-                    </Col>
+                    <NavItem 
+                        path="/board" 
+                        icon={IoGridOutline} 
+                        activeIcon={IoGrid} 
+                        label="커뮤니티" 
+                    />
                 </Row>
             </Container>
         </div>

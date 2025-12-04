@@ -1,11 +1,9 @@
-// src/component/Board/BoardList.js
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./board.style.css"
 
-// 필요 없으면 []로 두고 써도 됨
+// 원래 있던 더미 데이터 유지 (서버 연결 실패 시 백업용)
 const dummyPosts = [
     { id: 32, title: "강아지가 아파요", author: "user_id", date: "2025-10-10" },
     { id: 31, title: "강아지 귀여워ㅠㅠ", author: "user_id", date: "2025-10-10" },
@@ -22,264 +20,329 @@ const BoardList = () => {
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState("");
 
-    // 한 페이지 10개
-    const postsPerPage = 10;
-
-    // 최근 글 먼저
-    const sorted = [...dummyPosts].sort((a, b) => b.id - a.id);
-
-    const filtered = sorted.filter((p) =>
-        p.title.toLowerCase().includes(keyword.toLowerCase())
-    );
-
+    // 한 페이지당 게시글 수
+    const postsPerPage = 8;
     const [currentPage, setCurrentPage] = useState(1);
 
-    // useEffect(() => {
-    //     setCurrentPage(1);
-    // }, [keyword]);
-
-    const totalPages = Math.ceil(filtered.length / postsPerPage) || 1;
-    const indexOfLast = currentPage * postsPerPage;
-    const indexOfFirst = indexOfLast - postsPerPage;
-    const currentPosts = filtered.slice(indexOfFirst, indexOfLast);
-
-    // const goToPage = (page) => {
-    //     // if (page < 1 || page > totalPages) return;
-    //     // console.log(page);
-    //     if(page >= totalPage)
-    //     setCurrentPage(page);
-    // };
-
-    /**
-     * 서민관 시작
-     */
-    const [page, setPage] = useState(1);
+    // API 연동 상태
     const [totalPage, setTotalPage] = useState(1);
     const [totalContent, setTotalContent] = useState(0);
     const [data, setData] = useState([]);
+
     const goToPage = (p) => {
-        // if (page < 1 || page > totalPages) return;
-        // console.log(page);
-        if(p > totalPage) return;
+        if (p < 1 || p > totalPage) return;
         setCurrentPage(p);
     };
 
-    /**useEffect(() => {
-        if(keyword.trim() == '') {
-            console.log('sdad');
+    // 1. 검색어 변경 감지 -> 페이지 리셋
+    useEffect(() => {
+        if (currentPage !== 1) {
             setCurrentPage(1);
-            return;
         }
-        axios.get(`${process.env.REACT_APP_API_URL}/api/boardAll/${currentPage ?? 0}/${keyword}`)
-            .then(r => {
-                let result = r.data;
-                setPage(result.page);
-                setTotalPage(result.data.totalPages)
-                setData(result.data.data);
-                setTotalContent(result.data.totalCount)
-                console.log(result)
-            })
     }, [keyword]);
 
-    useEffect(()=>{
-        axios.get(`${process.env.REACT_APP_API_URL}/api/boardAll/${currentPage ?? 0}`)
-            .then(r => {
-                let result = r.data;
-                setPage(result.page);
-                setTotalPage(result.data.totalPages)
-                setData(result.data.data);
-                setTotalContent(result.data.totalCount)
-                console.log(result)
-            })
-    },[currentPage])*/
-
-    // 새로운 검색이 시작될 때 페이지를 1로 리셋하는 훅 (이전 페이지 상태를 초기화)
+    // 2. 메인 데이터 로드 (페이지 변경 또는 키워드 변경 시 실행)
     useEffect(() => {
-        // 키워드가 비어 있지 않은 상태에서, 새로운 키워드가 입력되었거나
-        // 키워드가 완전히 지워졌을 때 currentPage를 1로 재설정합니다.
-
-        // **중요:** API 호출은 아래의 메인 훅(loadDataEffect)이 담당합니다.
-        // 이 훅은 currentPage 상태를 변경하여 메인 훅을 트리거하는 역할만 합니다.
-
-        if (currentPage !== 1) {
-            // 현재 페이지가 1이 아니라면 1로 설정하여 메인 로드 훅을 트리거합니다.
-            setCurrentPage(1);
-        }
-        // currentPage가 이미 1이라면 상태 변경이 없으므로, 메인 훅이 keyword 변경을 감지하고 바로 실행됩니다.
-
-    }, [keyword]); // keyword가 변경될 때마다 실행
-
-// 메인 데이터 로딩 훅 (페이지 변경 또는 키워드 변경 시 실행)
-    useEffect(() => {
-        // URL 구성: 키워드 유무에 따라 경로를 동적으로 결정합니다.
         const pageToLoad = currentPage ?? 1;
         const trimmedKeyword = keyword ? keyword.trim() : "";
-
-        // 키워드가 있을 때만 /:keyword 경로를 추가합니다.
         const keywordPath = trimmedKeyword !== "" ? `/${trimmedKeyword}` : "";
-
-        // 예: keyword가 ""이면 /api/boardAll/1
-        // 예: keyword가 "페이징"이면 /api/boardAll/1/페이징
         const url = `${process.env.REACT_APP_API_URL}/api/boardAll/${pageToLoad}${keywordPath}`;
 
-        // 데이터 로드 시작
+        console.log("▶ 데이터 요청 URL:", url);
+
         axios.get(url)
             .then(r => {
                 let result = r.data;
-
-                // 응답 데이터 사용
-                setTotalPage(result.data.totalPages);
-                setData(result.data.data);
-                setTotalContent(result.data.totalCount);
-
-                // 서버에서 받은 페이지로 동기화 (선택 사항)
-                setCurrentPage(result.page);
-
-                console.log("data: ",result);
+                // API 응답 구조에 맞춰 상태 업데이트
+                if (result.data) {
+                    setTotalPage(result.data.totalPages);
+                    setData(result.data.data); // 실제 DB 데이터
+                    setTotalContent(result.data.totalCount);
+                    if (result.page) setCurrentPage(result.page);
+                }
+                console.log("▶ 데이터 수신 성공:", result);
             })
             .catch(error => {
-                console.error("게시글 조회 실패:", error);
-                // 실패 시 목록 초기화
-                setData([]);
-                setTotalPage(1);
-                setTotalContent(0);
+                console.warn("게시글 조회 실패 (더미 데이터로 전환):", error);
+                
+                // [Fallback] 서버 연결 실패 시 더미 데이터 사용 로직
+                const formattedDummy = dummyPosts.map(p => ({
+                    board_id: p.id,
+                    title: p.title,
+                    user_id: p.author,
+                    board_reg_date: p.date
+                }));
+
+                // 더미 데이터 검색 필터링
+                const filtered = formattedDummy.filter(p => 
+                    p.title.toLowerCase().includes(trimmedKeyword.toLowerCase())
+                );
+
+                // 더미 데이터 페이징
+                const indexOfLast = pageToLoad * postsPerPage;
+                const indexOfFirst = indexOfLast - postsPerPage;
+                const slicedData = filtered.slice(indexOfFirst, indexOfLast);
+
+                setData(slicedData);
+                setTotalPage(Math.ceil(filtered.length / postsPerPage) || 1);
+                setTotalContent(filtered.length);
             });
 
-    }, [currentPage, keyword]); // currentPage 또는 keyword가 바뀔 때 실행
-    /**
-     * 서민관 끝
-     */
-
-
+    }, [currentPage, keyword]);
 
     return (
-        // 🔹 Section을 써서 화면 높이 꽉 채우기
         <Container
             fluid
-            className="h-100 d-flex flex-column py-3"
             style={{
-                maxWidth: "900px",   // 전체 폭
-                margin: "0 auto",
+                height: "100%",
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                overflow: "hidden"
             }}
         >
-            {/* 상단 제목 */}
-            <Row className="mb-2">
-                <Col>
-                    <h5 style={{ fontWeight: "bold" }}>게시판</h5>
-                </Col>
-            </Row>
+            {/* 1. 상단 헤더 (AI 챗봇과 디자인 통일) */}
+            <div
+                style={{
+                    padding: "12px 15px",
+                    borderBottom: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    height: "60px",
+                    zIndex: 10,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                }}
+            >
+                <span style={{ fontSize: "1.1rem", fontWeight: "800", color: "#343a40", letterSpacing: "-0.5px" }}>
+                    커뮤니티
+                </span>
+            </div>
 
-            {/* 검색 영역 */}
-            <Row className="align-items-center mb-2">
-                <Col xs="auto">
-                    <Button variant="outline-dark" size="sm">
-                        제목 &gt;
-                    </Button>
-                </Col>
-                <Col xs>
-                    <Form.Control
-                        size="sm"
-                        type="text"
-                        placeholder="검색"
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                    />
-                </Col>
-                <Col xs="auto">
-                    <Button variant="dark" size="sm" onClick={()=>{setKeyword('')}}>
-                        초기화
-                    </Button>
-                </Col>
-                <Col xs="auto" className="text-end">
-                    <Button onClick={()=>navigate("/board/0")} variant="primary" size="sm">
-                        등록
-                    </Button>
-                </Col>
-            </Row>
-
-            {/* 🔹 가운데 영역을 flex-grow로 키워서 화면을 꽉 채움 */}
-            <Row className="flex-grow-1">
-                <Col className="d-flex flex-column">
-                    {/* 테이블 박스 (세로로 넓게) */}
-                    <div style={{
-                            border: "1px solid #007bff",
-                            borderRadius: "4px",
-                            overflow: "hidden",
-                            flexGrow: 1,           // 남는 세로 공간 채우기
-                        }}
-                    >
-                        <Table
-                            bordered
-                            hover
-                            size="sm"
-                            className="mb-0"
-                            style={{ textAlign: "center", fontSize: "0.85rem" }}
+            {/* 2. 중간 콘텐츠 영역 */}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#f8f9fa",
+                    minHeight: 0
+                }}
+            >
+                {/* 검색 및 등록 버튼 영역 */}
+                <Row className="align-items-center mb-3 g-2">
+                    <Col xs>
+                        <div style={{ position: "relative" }}>
+                            <Form.Control
+                                size="sm"
+                                type="text"
+                                placeholder="관심있는 내용을 검색해보세요"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                style={{
+                                    borderRadius: "20px",
+                                    backgroundColor: "#fff",
+                                    border: "1px solid #e9ecef",
+                                    padding: "10px 15px",
+                                    fontSize: "0.95rem",
+                                    color: "#333",
+                                    boxShadow: "0 2px 5px rgba(0,0,0,0.03)"
+                                }}
+                            />
+                            <span style={{ position: "absolute", right: "15px", top: "50%", transform: "translateY(-50%)", color: "#adb5bd" }}>
+                                🔍
+                            </span>
+                        </div>
+                    </Col>
+                    <Col xs="auto">
+                        <Button
+                            onClick={() => navigate("/board/0")}
+                            style={{
+                                borderRadius: "20px",
+                                fontWeight: "700",
+                                fontSize: "0.9rem",
+                                padding: "8px 18px",
+                                backgroundColor: "#4dabf7",
+                                border: "none",
+                                boxShadow: "0 4px 6px rgba(77, 171, 247, 0.2)",
+                                transition: "all 0.2s"
+                            }}
                         >
-                            <thead>
-                            <tr style={{ backgroundColor: "#e9f3ff" }}>
-                                <th style={{ width: "10%" }}>No</th>
-                                <th style={{ width: "40%" }}>제목</th>
-                                <th style={{ width: "20%" }}>작성자</th>
-                                <th style={{ width: "30%" }}>등록일</th>
-                            </tr>
+                            글쓰기
+                        </Button>
+                    </Col>
+                </Row>
+
+                {/* 테이블 영역 (카드 스타일) */}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                    <div style={{
+                        borderRadius: "16px",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        border: "1px solid #f1f3f5"
+                    }}>
+                        <Table
+                            hover
+                            className="mb-0"
+                            style={{ textAlign: "center", fontSize: "0.9rem", tableLayout: "fixed" }}
+                        >
+                            <thead style={{ backgroundColor: "#fff" }}>
+                                <tr>
+                                    <th style={{ width: "15%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>NO</th>
+                                    <th style={{ width: "50%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>TITLE</th>
+                                    <th style={{ width: "20%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>USER</th>
+                                    <th style={{ width: "15%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>DATE</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {data.map((d, idx) => (
-                                <tr
-                                    key={d.board_id}
-                                    style={{ cursor: "pointer" }}
-                                    className="align-middle"
-                                    // onClick={() => navigate(`/board/${d.board_id}`)}
-                                >
-                                    <td><span>{totalContent - (currentPage - 1) * 10 - idx}</span></td>
-                                    <td onClick={() => navigate(`/board/${d.board_id}`)}><span>{d.title}</span></td>
-                                    <td><span>{d.user_id}</span></td>
-                                    <td><span>{d.board_reg_date ? d.board_reg_date.substring(0, 10) : '날짜 없음'}</span></td>
-                                </tr>
-                            ))}
-                            {data.length === 0 && (
-                                <tr>
-                                    <td colSpan={4}>검색 결과가 없습니다.</td>
-                                </tr>
-                            )}
+                                {data.length > 0 ? (
+                                    data.map((d, idx) => (
+                                        <tr
+                                            key={d.board_id}
+                                            style={{ cursor: "pointer", transition: "background-color 0.1s" }}
+                                            className="align-middle"
+                                            onClick={() => navigate(`/board/${d.board_id}`)}
+                                        >
+                                            <td style={{ padding: "16px 10px", color: "#adb5bd", fontSize: "0.85rem", borderBottom: "1px solid #f8f9fa" }}>
+                                                {/* 전체 글 수 기준 역순 번호 계산 */}
+                                                {totalContent - (currentPage - 1) * postsPerPage - idx}
+                                            </td>
+                                            <td style={{
+                                                padding: "16px 10px",
+                                                textAlign: "left",
+                                                fontWeight: "600",
+                                                color: "#495057",
+                                                borderBottom: "1px solid #f8f9fa",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis"
+                                            }}>
+                                                {d.title}
+                                            </td>
+                                            <td style={{ padding: "16px 10px", color: "#868e96", fontSize: "0.85rem", borderBottom: "1px solid #f8f9fa" }}>
+                                                {d.user_id}
+                                            </td>
+                                            <td style={{ padding: "16px 10px", color: "#adb5bd", fontSize: "0.8rem", borderBottom: "1px solid #f8f9fa" }}>
+                                                {d.board_reg_date ? d.board_reg_date.substring(5, 10) : '-'}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: "60px 0", color: "#adb5bd", borderBottom: "none" }}>
+                                            <div style={{ fontSize: "2rem", marginBottom: "10px" }}>📭</div>
+                                            등록된 게시글이 없습니다.
+                                        </td>
+                                    </tr>
+                                )}
+
+                                {/* 빈 행 채우기 (스타일 유지용 - 8개 기준) */}
+                                {Array.from({ length: Math.max(0, postsPerPage - data.length) }).map((_, idx) => (
+                                    <tr key={`empty-${idx}`}>
+                                        <td style={{ padding: "16px 10px", color: "transparent", borderBottom: "1px solid #f8f9fa" }}>-</td>
+                                        <td style={{ padding: "16px 10px", color: "transparent", borderBottom: "1px solid #f8f9fa" }}>-</td>
+                                        <td style={{ padding: "16px 10px", color: "transparent", borderBottom: "1px solid #f8f9fa" }}>-</td>
+                                        <td style={{ padding: "16px 10px", color: "transparent", borderBottom: "1px solid #f8f9fa" }}>-</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </Table>
                     </div>
-                    {/* 하단 페이지네이션 */}
-                    <div
-                        className="mt-2 d-flex justify-content-center align-items-center"
-                        style={{ fontSize: "0.8rem", gap: "4px" }}
-                    >
-                        <Button variant="outline-secondary" size="sm" onClick={() => goToPage(currentPage - 1)}  disabled={currentPage === 1}>
-                            &lt;
-                        </Button>
+                </div>
+            </div>
 
-                        {Array.from({ length: totalPage  }, (_, idx) => idx + 1).map(
-                            (p) => (
-                                <Button
-                                    key={p}
-                                    variant={
-                                        p === currentPage ? "secondary" : "outline-secondary"
-                                    }
-                                    size="sm"
-                                    onClick={() => goToPage(p)}
-                                >
-                                    {p}
-                                </Button>
-                            )
-                        )}
+            {/* 3. 하단 페이지네이션 영역 */}
+            <div
+                style={{
+                    padding: "15px",
+                    borderTop: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexShrink: 0,
+                    paddingBottom: "max(15px, env(safe-area-inset-bottom))",
+                    gap: "8px"
+                }}
+            >
+                <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    style={{
+                        borderRadius: "12px",
+                        width: "36px",
+                        height: "36px",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f8f9fa",
+                        color: currentPage === 1 ? "#dee2e6" : "#495057",
+                        border: "none",
+                        fontSize: "1rem"
+                    }}
+                >
+                    &lt;
+                </Button>
 
+                {Array.from({ length: totalPage }, (_, idx) => idx + 1).map(
+                    (p) => (
                         <Button
-                            variant="outline-secondary"
+                            key={p}
                             size="sm"
-                            onClick={() => goToPage(currentPage + 1)}
-                            disabled={currentPage === totalPage}
+                            onClick={() => goToPage(p)}
+                            style={{
+                                borderRadius: "12px",
+                                width: "36px",
+                                height: "36px",
+                                padding: 0,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontWeight: p === currentPage ? "800" : "500",
+                                border: "none",
+                                backgroundColor: p === currentPage ? "#4dabf7" : "transparent",
+                                color: p === currentPage ? "#fff" : "#868e96",
+                                boxShadow: p === currentPage ? "0 4px 6px rgba(77, 171, 247, 0.3)" : "none",
+                                transition: "all 0.2s"
+                            }}
                         >
-                            &gt;
+                            {p}
                         </Button>
-                    </div>
-                </Col>
-            </Row>
+                    )
+                )}
+
+                <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPage}
+                    style={{
+                        borderRadius: "12px",
+                        width: "36px",
+                        height: "36px",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f8f9fa",
+                        color: currentPage === totalPage ? "#dee2e6" : "#495057",
+                        border: "none",
+                        fontSize: "1rem"
+                    }}
+                >
+                    &gt;
+                </Button>
+            </div>
         </Container>
     );
 };

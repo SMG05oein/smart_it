@@ -1,78 +1,142 @@
 import React, { useEffect, useState } from 'react';
-import './NB.style.css';
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row, Button } from "react-bootstrap";
+import appLogo from "../assets/app-logo.png"; 
+// import './NB.style.css'; // 기존 CSS가 방해된다면 주석 처리하세요.
 
 const Gnb = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
     const [isLogin, setIsLogin] = useState(false);
 
-    // 주소가 바뀔 때마다 localStorage에서 로그인 상태 갱신
     useEffect(() => {
         const flag = localStorage.getItem("isLogin") === "true";
         setIsLogin(flag);
     }, [location]);
 
     const handleLogout = () => {
-        // 필요하면 여기서 서버 로그아웃 API 호출 가능
-
         localStorage.removeItem("isLogin");
         localStorage.removeItem("userId");
-
         setIsLogin(false);
         navigate("/");
     };
 
+    const navButtonStyle = {
+        borderRadius: "20px",
+        padding: "6px 16px",
+        fontSize: "0.9rem",
+        fontWeight: "600",
+        border: "none",
+        transition: "all 0.2s",
+        backgroundColor: "transparent",
+        color: "#666"
+    };
+
     return (
         <>
-            <div className="border-bottom py-3" style={{ maxHeight: '60px' }}>
+            {/* 상단 네비게이션 바 */}
+            <div 
+                className="sticky-top" // 상단 고정
+                style={{ 
+                    backgroundColor: "rgba(255, 255, 255, 0.95)", // 살짝 투명한 배경
+                    backdropFilter: "blur(10px)", // 블러 효과 (아이폰 스타일)
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)", // 부드러운 그림자
+                    zIndex: 1000
+                }}
+            >
                 <Container>
-                    <Row className="align-items-center">
-                        {/* 로고 */}
-                        <Col xs={6}>
-                            <h4
-                                className="m-0 text-primary"
-                                style={{ cursor: "pointer" }}
+                    <Row 
+                        className="align-items-center" 
+                        style={{ height: "65px" }} // 높이 살짝 키움
+                    >
+                        {/* 1. 왼쪽: 로고 영역 */}
+                        <Col xs={6} className="d-flex align-items-center">
+                            <div 
                                 onClick={() => navigate('/')}
+                                style={{ 
+                                    cursor: "pointer", 
+                                    display: "flex", 
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}
                             >
-                                로고
-                            </h4>
+                                <img 
+                                    src={appLogo} 
+                                    alt="Logo" 
+                                    style={{ 
+                                        width: "36px", 
+                                        height: "36px", 
+                                        borderRadius: "10px",
+                                        boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                        objectFit: "cover"
+                                    }}
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                                <span style={{ 
+                                    fontSize: "1.2rem", 
+                                    fontWeight: "800", 
+                                    color: "#343a40",
+                                    letterSpacing: "-0.5px"
+                                }}>
+                                    멍멍케어
+                                </span>
+                            </div>
                         </Col>
 
-                        {/* 오른쪽: 로그인 전/후 버튼 변경 */}
+                        {/* 2. 오른쪽: 메뉴 영역 */}
                         <Col xs={6}>
-                            <div className={"d-flex justify-content-end"} style={{ gap: "10px" }}>
+                            <div className="d-flex justify-content-end align-items-center" style={{ gap: "5px" }}>
                                 {isLogin ? (
                                     <>
-                                        <div
-                                            className="text-secondary cursor-pointer"
+                                        <Button 
+                                            variant="light"
+                                            style={navButtonStyle}
                                             onClick={() => navigate('/mypage')}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f1f3f5"}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                                         >
                                             마이페이지
-                                        </div>
-                                        <div
-                                            className="text-secondary cursor-pointer"
+                                        </Button>
+                                        <Button 
+                                            style={{
+                                                ...navButtonStyle,
+                                                backgroundColor: "#f1f3f5", // 로그아웃은 회색 배경
+                                                color: "#495057"
+                                            }}
                                             onClick={handleLogout}
                                         >
                                             로그아웃
-                                        </div>
+                                        </Button>
                                     </>
                                 ) : (
                                     <>
-                                        <div
-                                            className="text-secondary cursor-pointer"
+                                        <Button 
+                                            variant="light"
+                                            style={navButtonStyle}
                                             onClick={() => navigate('/Login')}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.backgroundColor = "#e7f5ff";
+                                                e.target.style.color = "#4dabf7";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.backgroundColor = "transparent";
+                                                e.target.style.color = "#666";
+                                            }}
                                         >
                                             로그인
-                                        </div>
-                                        <div
-                                            className="text-secondary cursor-pointer"
+                                        </Button>
+                                        <Button 
+                                            style={{
+                                                ...navButtonStyle,
+                                                backgroundColor: "#4dabf7", // 회원가입은 포인트 컬러(파랑)
+                                                color: "#fff",
+                                                padding: "6px 18px",
+                                                boxShadow: "0 2px 4px rgba(77, 171, 247, 0.3)"
+                                            }}
                                             onClick={() => navigate('/SignUp')}
                                         >
                                             회원가입
-                                        </div>
+                                        </Button>
                                     </>
                                 )}
                             </div>
@@ -80,7 +144,11 @@ const Gnb = () => {
                     </Row>
                 </Container>
             </div>
-            <Outlet />
+            
+            {/* 실제 컨텐츠가 렌더링되는 곳 */}
+            <div style={{ minHeight: "calc(100vh - 65px)", backgroundColor: "#fff" }}>
+                <Outlet />
+            </div>
         </>
     );
 };
