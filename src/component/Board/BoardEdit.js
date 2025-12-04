@@ -21,15 +21,14 @@ const BoardEdit = () => {
         if (!initialPost.title && !initialPost.content) {
             // (필요 시 API로 데이터를 다시 불러오는 로직을 여기에 추가 가능)
             // 현재는 간단히 경고 후 이동
-            // alert("잘못된 접근입니다.");
-            // navigate("/board");
-            // return;
+            alert("잘못된 접근입니다.");
+            navigate("/board");
+            return;
         }
 
         const checkPermission = async () => {
             try {
                 // 본인 확인 API (주석 해제 후 사용)
-                /*
                 const res = await axios.post(
                     `${process.env.REACT_APP_API_URL}/api/isMeBoard`, 
                     { boardId: id }, 
@@ -39,13 +38,12 @@ const BoardEdit = () => {
                     alert("수정 권한이 없습니다.");
                     navigate("/board");
                 }
-                */
                // 테스트용: 로딩 시늉만 하고 통과
                setTimeout(() => setLoading(false), 300);
 
             } catch (error) {
                 console.error("권한 확인 실패:", error);
-                // navigate("/board");
+                navigate("/board");
                 setLoading(false);
             }
         };
@@ -68,7 +66,6 @@ const BoardEdit = () => {
             console.log("▶ 수정 요청:", { id, title, content });
 
             // API 호출 (주석 해제 후 사용)
-            /*
             const res = await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/updateBoard`,
                 {
@@ -85,10 +82,9 @@ const BoardEdit = () => {
             } else {
                 alert("수정에 실패했습니다.");
             }
-            */
-           
+
             // 테스트용 성공 처리
-            alert("(테스트) 게시글이 수정되었습니다.");
+            // alert("게시글이 수정되었습니다.");
             navigate(`/board/${id}`);
 
         } catch (err) {

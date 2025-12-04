@@ -9,6 +9,8 @@ const CurrentMap = forwardRef((props, ref) => {
     const markersVisibleRef = useRef(true);
     const selectedPlaceRef = useRef(null);
 
+    const [visible, setVisible] = React.useState(false);
+
     // ---------------- 지도 초기화 ----------------
     useEffect(() => {
         if (window.kakao && window.kakao.maps) {
@@ -58,6 +60,8 @@ const CurrentMap = forwardRef((props, ref) => {
         const map = mapRef.current;
         if (!map || !keyword) return;
 
+        setVisible(false);
+
         hospitalMarkersRef.current.forEach((m) => m.setMap(null));
         hospitalMarkersRef.current = [];
         selectedPlaceRef.current = null;
@@ -89,17 +93,18 @@ const CurrentMap = forwardRef((props, ref) => {
     const toggleMarkers = () => {
         const map = mapRef.current;
         if (!map) return;
-        const visible = !markersVisibleRef.current;
+        setVisible(!visible)
+        // const visible = !markersVisibleRef.current;
         hospitalMarkersRef.current.forEach((m) => m.setMap(visible ? map : null));
         markersVisibleRef.current = visible;
     };
 
     const goMyLocation = () => {
-        if (mapRef.current && myPosRef.current) {
+        // if (mapRef.current && myPosRef.current) {
             mapRef.current.panTo(myPosRef.current);
-        } else {
-            alert("위치 정보를 가져올 수 없습니다.");
-        }
+        // } else {
+        //     alert("위치 정보를 가져올 수 없습니다.");
+        // }
     };
 
     const openRoute = () => {

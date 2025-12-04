@@ -34,7 +34,8 @@ function Homepage() {
             let diaryList = res.data.data;
 
             if (!Array.isArray(diaryList)) diaryList = [];
-            
+            // 캘린더에 표시할 날짜들 및 리스트 아이템 준비
+            const dateSet = new Set();
             const items = [];
             diaryList.forEach((item) => {
                 const dateStr = item.use_date || item.date || item.useDate || null;
@@ -46,11 +47,13 @@ function Homepage() {
                 const [y, m, d] = parts;
                 const dateObj = new Date(y, m - 1, d);
 
+                dateSet.add(`${String(y).padStart(4,"0")}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+
                 items.push({
                     date: dateObj,
-                    title: item.title || item.name || "",
+                    text: item.title || item.name || "",
                     key: `${String(y).padStart(4,"0")}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`,
-                    use_date_local: dateStr, // DailyList에서 사용
+                    idxInDay: 0,
                     raw: item
                 });
             });
@@ -58,7 +61,7 @@ function Homepage() {
             items.sort((a, b) => a.date - b.date);
 
             setDiaryDateKeys(diaryList);
-            setMonthTodos(items); // 가공된 items 저장
+            setMonthTodos(diaryList);
 
         } catch (err) {
             console.error("📛 월간 일지 조회 실패:", err);
@@ -213,8 +216,6 @@ function Homepage() {
                     handleDeleteTodo={() => {}}
                 />
                 
-                {/* 하단 여백 (FNB에 가려지지 않게) */}
-                <div style={{ height: "80px", flexShrink: 0 }}></div>
             </div>
         </Container>
     );

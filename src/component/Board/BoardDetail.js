@@ -28,7 +28,7 @@ const BoardDetail = () => {
     const postId = Number(id);
 
     // 상태 관리
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
     const [isMe, setIsMe] = useState(false); // 작성자 본인 여부
     const [loading, setLoading] = useState(true);
 
@@ -37,37 +37,38 @@ const BoardDetail = () => {
         const fetchData = async () => {
             try {
                 // 1. 본인 확인 (API 연결 시 활성화)
-                /*
-                const meRes = await axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`, 
-                    { boardId: postId }, 
+                const meRes = await axios.post(`${process.env.REACT_APP_API_URL}/api/isMeBoard`,
+                    { boardId: postId },
                     { withCredentials: true }
                 );
                 setIsMe(meRes.data.isMe);
-                */
                 // 테스트용: id가 32번이면 내 글이라고 가정
                 if (postId === 32) setIsMe(true);
 
                 // 2. 게시글 상세 조회 (API 연결 시 활성화)
-                /*
                 const detailRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/board/${postId}`);
-                setData(detailRes.data.data);
-                */
+                console.log(detailRes)
+                if(!(detailRes.data.data.board_id)){
+                    const dummy = dummyPosts.find(p => p.id === postId);
+                    if (dummy) {
+                        // API 응답 구조에 맞게 매핑
+                        setData({
+                            board_id: dummy.id,
+                            title: dummy.title,
+                            user_id: dummy.author,
+                            board_reg_date: dummy.date,
+                            board_update_date: dummy.date,
+                            contents: dummy.content
+                        });
+                    } else {
+                        setData(null);
+                    }
+                }else{
+                    setData(detailRes.data.data);
+                }
+
 
                 // 테스트용: 더미 데이터에서 찾기
-                const dummy = dummyPosts.find(p => p.id === postId);
-                if (dummy) {
-                    // API 응답 구조에 맞게 매핑
-                    setData({
-                        board_id: dummy.id,
-                        title: dummy.title,
-                        user_id: dummy.author,
-                        board_reg_date: dummy.date,
-                        board_update_date: dummy.date,
-                        contents: dummy.content
-                    });
-                } else {
-                    setData(null);
-                }
 
             } catch (error) {
                 console.error("데이터 로딩 실패:", error);
@@ -86,13 +87,11 @@ const BoardDetail = () => {
         try {
             console.log("▶ 삭제 요청:", postId);
             // API 호출 (주석 해제 후 사용)
-            /*
             await axios.post(
                 `${process.env.REACT_APP_API_URL}/api/deleteBoard`,
                 { boardId: postId },
                 { withCredentials: true }
             );
-            */
             alert("게시글이 삭제되었습니다.");
             navigate("/board");
         } catch (err) {
