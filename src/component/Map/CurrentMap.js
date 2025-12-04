@@ -18,7 +18,7 @@ const CurrentMap = forwardRef((props, ref) => {
             return;
         }
 
-        const KAKAO_KEY = process.env.REACT_APP_KAKAO_KEY;
+        const KAKAO_KEY = 'ddd7c7996ea86b6be087322e1e7afc02';
         if (!KAKAO_KEY) return;
 
         const script = document.createElement("script");

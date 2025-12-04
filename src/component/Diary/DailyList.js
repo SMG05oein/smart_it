@@ -55,7 +55,7 @@ const DailyList = ({ currentMonth, monthTodos, currentYear }) => {
             {topThree.length === 0 ? (
                 <div style={{ 
                     textAlign: "center", 
-                    padding: "40px 0", 
+                    padding: "30px 0", 
                     color: "#adb5bd", 
                     fontSize: "0.9rem" 
                 }}>

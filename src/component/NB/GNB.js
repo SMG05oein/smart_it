@@ -11,7 +11,7 @@ const Gnb = () => {
 
     useEffect(() => {
         const flag = localStorage.getItem("isLogin") === "true";
-        setIsLogin(flag);
+        setIsLogin(true);
     }, [location]);
 
     const handleLogout = () => {
@@ -90,7 +90,9 @@ const Gnb = () => {
                                     <>
                                         <Button 
                                             variant="light"
-                                            style={navButtonStyle}
+                                            style={{navButtonStyle,
+                                                textWrap:'nowrap',
+                                            }}
                                             onClick={() => navigate('/mypage')}
                                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f1f3f5"}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
@@ -99,9 +101,10 @@ const Gnb = () => {
                                         </Button>
                                         <Button 
                                             style={{
+                                                textWrap:'nowrap',
                                                 ...navButtonStyle,
-                                                backgroundColor: "#f1f3f5", // 로그아웃은 회색 배경
-                                                color: "#495057"
+                                                backgroundColor: "#4dabf7", // 로그아웃은 회색 배경
+                                                color: "#fff",
                                             }}
                                             onClick={handleLogout}
                                         >

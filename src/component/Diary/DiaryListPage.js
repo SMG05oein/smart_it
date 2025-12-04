@@ -1,15 +1,13 @@
-// src/component/Diary/DiaryListPage.js
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Table, Button } from "react-bootstrap";
-import {useNavigate, useParams} from "react-router-dom";
-import "./daily.style.css"
+import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
 
 const DiaryListPage = () => {
     const navigate = useNavigate();
-    const {year: yy, month: mm} = useParams();
-    // 현재 날짜
+    const { year: yy, month: mm } = useParams();
+    
+    // 현재 날짜 설정
     const now = new Date();
     const currentYear = yy ? Number(yy) : now.getFullYear();
     const currentMonth = mm ? Number(mm) : now.getMonth() + 1;
@@ -18,37 +16,34 @@ const DiaryListPage = () => {
     const [year, setYear] = useState(currentYear);
     const [month, setMonth] = useState(currentMonth);
 
-    // 받아온 일지 데이터
+    // 데이터 상태
     const [diaries, setDiaries] = useState([]);
-
-    // 페이지네이션
+    
+    // [수정] 페이지네이션 6개로 축소 (스크롤 방지)
     const [currentPage, setCurrentPage] = useState(1);
-    const diariesPerPage = 10;
+    const diariesPerPage = 8; 
 
-    // 📌 ⭐ 백엔드 데이터 불러오기
+    // 📌 백엔드 데이터 불러오기
     const fetchDiary = async () => {
         try {
             const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/daily/${year}/${month}`, {
-                withCredentials: true, // 쿠키 필요할 경우
+                withCredentials: true,
             });
-
-            setDiaries(res.data.data);
+            setDiaries(res.data.data || []);
             setCurrentPage(1);
-
         } catch (err) {
             console.error("Diary fetch error:", err);
             setDiaries([]);
         }
     };
 
-    // 연/월 바뀌면 자동 조회
     useEffect(() => {
         fetchDiary();
     }, [year, month]);
 
-    // 페이지 계산
+    // 데이터 정렬 및 페이징 계산
     const sorted = [...diaries].sort(
-        (a, b) => new Date(b.use_date) - new Date(a.use_date)
+        (a, b) => new Date(b.use_date || b.date) - new Date(a.use_date || a.date)
     );
 
     const totalPages = Math.ceil(sorted.length / diariesPerPage) || 1;
@@ -62,114 +57,270 @@ const DiaryListPage = () => {
     };
 
     return (
-        <Container fluid className="h-100 d-flex flex-column py-3" style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <Container
+            fluid
+            style={{
+                height: "100%",
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                overflow: "hidden"
+            }}
+        >
+            {/* 1. 상단 헤더 */}
+            <div
+                style={{
+                    padding: "12px 15px",
+                    borderBottom: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    textAlign: "center",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    height: "60px",
+                    zIndex: 10,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                }}
+            >
+                <span style={{ fontSize: "1.1rem", fontWeight: "800", color: "#343a40", letterSpacing: "-0.5px" }}>
+                    나의 일지 리스트
+                </span>
+            </div>
 
-            {/* 제목 */}
-            <Row className="mb-2">
-                <Col>
-                    <h5 style={{ fontWeight: "bold" }}>나의 일지 리스트</h5>
-                </Col>
-            </Row>
+            {/* 2. 중간 콘텐츠 영역 (스크롤 최소화) */}
+            <div
+                style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#f8f9fa", 
+                    minHeight: 0
+                }}
+            >
+                {/* 컨트롤 바 (연/월 선택 + 등록 버튼) */}
+                <Row className="align-items-center mb-3 g-2">
+                    <Col xs="auto" className="d-flex gap-2">
+                        <Form.Select
+                            size="sm"
+                            value={year}
+                            onChange={(e) => setYear(parseInt(e.target.value))}
+                            style={{
+                                height: "30px",
+                                width: "90px",
+                                borderRadius: "12px",
+                                border: "1px solid #e9ecef",
+                                backgroundColor: "#fff",
+                                fontWeight: "600",
+                                color: "#495057",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
+                                fontSize: "0.9rem"
+                            }}
+                        >
+                            {[2026, 2025, 2024, 2023].map(y => (
+                                <option key={y} value={y}>{y}년</option>
+                            ))}
+                        </Form.Select>
 
-            {/* 연/월 선택 */}
-            <Row className="justify-content-between align-items-center mb-2">
-                <Col xs="auto" className="d-flex gap-2">
-                    <select
-                        className="form-control form-control-sm"
-                        style={{ width: "80px" }}
-                        value={year}
-                        onChange={(e) => setYear(parseInt(e.target.value))}
-                    >
-                        <option value={2026}>2026년</option>
-                        <option value={2025}>2025년</option>
-                        <option value={2024}>2024년</option>
-                        <option value={2023}>2023년</option>
-                    </select>
+                        <Form.Select
+                            size="sm"
+                            value={month}
+                            onChange={(e) => setMonth(parseInt(e.target.value))}
+                            style={{
+                                width: "70px",
+                                borderRadius: "12px",
+                                border: "1px solid #e9ecef",
+                                backgroundColor: "#fff",
+                                fontWeight: "600",
+                                color: "#495057",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
+                                fontSize: "0.9rem"
+                            }}
+                        >
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                                <option key={m} value={m}>{m}월</option>
+                            ))}
+                        </Form.Select>
+                    </Col>
 
-                    <select
-                        className="form-control form-control-sm"
-                        style={{ width: "80px" }}
-                        value={month}
-                        onChange={(e) => setMonth(parseInt(e.target.value))}
-                    >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                            <option key={m} value={m}>
-                                {m}월
-                            </option>
-                        ))}
-                    </select>
-                </Col>
+                    <Col className="text-end">
+                        <Button
+                            onClick={() => navigate("/diary/write")}
+                            style={{
+                                marginLeft: "50px",
+                                borderRadius: "20px",
+                                fontWeight: "700",
+                                fontSize: "0.9rem",
+                                padding: "8px 18px",
+                                backgroundColor: "#4dabf7", 
+                                border: "none",
+                                boxShadow: "0 4px 6px rgba(77, 171, 247, 0.2)",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            일지 쓰기
+                        </Button>
+                    </Col>
+                </Row>
 
-                <Col xs="auto" className="text-end d-flex gap-2">
-                    <Button variant="primary" size="sm" onClick={() => navigate("/diary/write")}>
-                        등록
-                    </Button>
-                </Col>
-            </Row>
-
-            {/* 테이블 */}
-            <Row className="flex-grow-1">
-                <Col className="d-flex flex-column">
+                {/* 테이블 영역 (카드 스타일) */}
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                     <div style={{
-                        border: "1px solid #007bff",
-                        borderRadius: "4px",
+                        borderRadius: "16px",
                         overflow: "hidden",
-                        flexGrow: 1,
+                        backgroundColor: "#fff",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                        border: "1px solid #f1f3f5"
                     }}>
-                        <Table bordered hover size="sm" className="mb-0" style={{ textAlign: "center", fontSize: "0.85rem" }}>
-                            <thead>
-                            <tr style={{ backgroundColor: "#e9f3ff" }}>
-                                <th>No</th>
-                                <th>제목</th>
-                                <th>내용</th>
-                                <th>날짜</th>
-                            </tr>
+                        <Table
+                            hover
+                            className="mb-0"
+                            style={{ textAlign: "center", fontSize: "0.9rem", tableLayout: "fixed" }}
+                        >
+                            <thead style={{ backgroundColor: "#fff" }}>
+                                <tr>
+                                    <th style={{ width: "15%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>NO</th>
+                                    <th style={{ width: "25%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>DATE</th>
+                                    <th style={{ width: "60%", padding: "15px 10px", borderBottom: "1px solid #f1f3f5", color: "#868e96", fontWeight: "600", fontSize: "0.8rem" }}>TITLE</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {currentDiaries.map((d, idx) => (
-                                <tr key={d.calender_id} style={{ cursor: "pointer" }}>
-                                    <td><span>{indexOfFirst + idx + 1}</span></td>
-                                    <td onClick={() => navigate(`/diary/edit/${d.calender_id}`, {state: {year: year, month: month}})}><span>{d.title}</span></td>
-                                    <td>
-                                        <span>{d.content.length > 15 ? d.content.slice(0, 15) + "..." : d.content}</span>
-                                    </td>
-                                    <td><span>{d.use_date_local}</span></td>
-                                </tr>
-                            ))}
-
-                            {currentDiaries.length === 0 && (
-                                <tr>
-                                    <td colSpan={4}>등록된 일지가 없습니다.</td>
-                                </tr>
-                            )}
+                                {currentDiaries.length > 0 ? (
+                                    currentDiaries.map((d, idx) => (
+                                        <tr
+                                            key={d.calender_id || idx}
+                                            style={{ cursor: "pointer", transition: "background-color 0.1s" }}
+                                            className="align-middle"
+                                            onClick={() => navigate(`/diary/edit/${d.calender_id}`, { state: { year, month } })}
+                                        >
+                                            <td style={{ padding: "16px 10px", color: "#adb5bd", fontSize: "0.85rem", borderBottom: "1px solid #f8f9fa" }}>
+                                                {/* 역순 번호 */}
+                                                {sorted.length - ((currentPage - 1) * diariesPerPage) - idx}
+                                            </td>
+                                            <td style={{ padding: "16px 10px", color: "#4dabf7", fontWeight: "600", fontSize: "0.85rem", borderBottom: "1px solid #f8f9fa" }}>
+                                                {d.use_date ? d.use_date.substring(5, 10) : "-"}
+                                            </td>
+                                            <td style={{
+                                                padding: "16px 10px",
+                                                textAlign: "left",
+                                                fontWeight: "500",
+                                                color: "#343a40",
+                                                borderBottom: "1px solid #f8f9fa",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis"
+                                            }}>
+                                                {d.title}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={3} style={{ padding: "50px 0", color: "#adb5bd", borderBottom: "none" }}>
+                                            <div style={{ fontSize: "2rem", marginBottom: "10px" }}>📝</div>
+                                            작성된 일지가 없습니다.
+                                        </td>
+                                    </tr>
+                                )}
+                                
+                                {/* [수정] 빈 행 채우기 (스타일 유지용) - 6개 기준 */}
+                                {Array.from({ length: Math.max(0, diariesPerPage - currentDiaries.length) }).map((_, idx) => (
+                                    <tr key={`empty-${idx}`}>
+                                        <td style={{ padding: "6px 10px", color: "transparent", borderBottom: "1px solid #f8f9fa" }}>-</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </Table>
                     </div>
+                </div>
+            </div>
 
-                    {/* 페이지네이션 */}
-                    <div className="mt-2 d-flex justify-content-center align-items-center" style={{ fontSize: "0.8rem", gap: "4px" }}>
-                        <Button variant="outline-secondary" size="sm" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-                            &lt;
-                        </Button>
+            {/* 3. 하단 페이지네이션 영역 (고정) */}
+            <div
+                style={{
+                    padding: "15px",
+                    borderTop: "1px solid #f1f3f5",
+                    backgroundColor: "#fff",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexShrink: 0,
+                    paddingBottom: "max(15px, env(safe-area-inset-bottom))",
+                    gap: "8px"
+                }}
+            >
+                <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    style={{
+                        borderRadius: "12px",
+                        width: "36px",
+                        height: "36px",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f8f9fa",
+                        color: currentPage === 1 ? "#dee2e6" : "#495057",
+                        border: "none",
+                        fontSize: "1rem"
+                    }}
+                >
+                    &lt;
+                </Button>
 
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <Button
-                                key={page}
-                                variant={page === currentPage ? "secondary" : "outline-secondary"}
-                                size="sm"
-                                onClick={() => goToPage(page)}
-                            >
-                                {page}
-                            </Button>
-                        ))}
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                    <Button
+                        key={p}
+                        size="sm"
+                        onClick={() => goToPage(p)}
+                        style={{
+                            borderRadius: "12px",
+                            width: "36px",
+                            height: "36px",
+                            padding: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: p === currentPage ? "800" : "500",
+                            border: "none",
+                            backgroundColor: p === currentPage ? "#4dabf7" : "transparent",
+                            color: p === currentPage ? "#fff" : "#868e96",
+                            boxShadow: p === currentPage ? "0 4px 6px rgba(77, 171, 247, 0.3)" : "none",
+                            transition: "all 0.2s"
+                        }}
+                    >
+                        {p}
+                    </Button>
+                ))}
 
-                        <Button variant="outline-secondary" size="sm" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                            &gt;
-                        </Button>
-                    </div>
-                </Col>
-            </Row>
-
+                <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    style={{
+                        borderRadius: "12px",
+                        width: "36px",
+                        height: "36px",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f8f9fa",
+                        color: currentPage === totalPages ? "#dee2e6" : "#495057",
+                        border: "none",
+                        fontSize: "1rem"
+                    }}
+                >
+                    &gt;
+                </Button>
+            </div>
         </Container>
     );
 };
