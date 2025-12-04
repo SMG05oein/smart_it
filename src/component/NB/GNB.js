@@ -11,7 +11,7 @@ const Gnb = () => {
 
     useEffect(() => {
         const flag = localStorage.getItem("isLogin") === "true";
-        setIsLogin(true);
+        setIsLogin(flag);
     }, [location]);
 
     const handleLogout = () => {
