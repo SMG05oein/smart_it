@@ -74,7 +74,9 @@ const DiaryEditPage = () => {
                 { withCredentials: true }
             );
 
-            if (res.data.state === 200) {
+            console.log(res.data);
+
+            if (res.data.status === 200) {
                 alert("일지가 삭제되었습니다.");
                 navigate(-1); // 리스트로 이동
             } else {

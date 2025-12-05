@@ -201,7 +201,7 @@ const DiaryListPage = () => {
                                                 {sorted.length - ((currentPage - 1) * diariesPerPage) - idx}
                                             </td>
                                             <td style={{ padding: "16px 10px", color: "#4dabf7", fontWeight: "600", fontSize: "0.85rem", borderBottom: "1px solid #f8f9fa" }}>
-                                                {d.use_date ? d.use_date.substring(5, 10) : "-"}
+                                                {d.use_date_local ? d.use_date_local.substring(5, 10) : "-"}
                                             </td>
                                             <td style={{
                                                 padding: "16px 10px",

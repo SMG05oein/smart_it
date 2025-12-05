@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import DailyList from "./DailyList"; // 경로 확인 필요
+import DailyList from "./DailyList";
 import axios from "axios";
 import { Container } from "react-bootstrap";
+import "./daily.style.css"
 
 function Homepage() {
     const [selectedDate, setSelectedDate] = useState(new Date());
